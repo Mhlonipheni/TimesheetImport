@@ -1,0 +1,15 @@
+<p>{{selectedSite.siteName}}</p>
+<file-upload [control]="fileUploadControl">
+    <ng-template let-isFileDragDropAvailable="isFileDragDropAvailable" #placeholder>
+       <div *ngIf="fileUploadControl.size === 0">
+            <span *ngIf="isFileDragDropAvailable">drop or click</span>
+            <span *ngIf="!isFileDragDropAvailable">click</span>
+        </div>
+    </ng-template>
+
+    <ng-template let-i="index" let-file="file" let-control="control" #item>
+        <div class="file-info" (click)="control.removeFile(file)">
+            <span class="file-name">{{ file.name }}</span>
+        </div>
+    </ng-template>
+</file-upload>
