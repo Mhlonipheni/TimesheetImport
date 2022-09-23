@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http'
 import {NgxPaginationModule} from 'ngx-pagination';
 import { FileUploadModule } from '@iplab/ngx-file-upload';
@@ -34,7 +34,8 @@ import { TimesheetUploadComponent } from './timesheet-import/timesheet-upload/ti
     MatSelectModule,
     MatButtonModule,
     MatFormFieldModule,
-    NgxMatSelectSearchModule
+    NgxMatSelectSearchModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

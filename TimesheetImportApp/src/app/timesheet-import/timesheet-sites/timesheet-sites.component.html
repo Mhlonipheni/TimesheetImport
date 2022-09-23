@@ -1,22 +1,48 @@
 <div class="row">
-    <div class="col-md-6">
-        <input [(ngModel)]="siteFilter" class="form-control" (keyup)="filterFn()" placeholder="Filter"/>
-        <select name="country" value="country">
-            <option [ngValue]="null" disabled>Select Country</option>
-            <option *ngFor="let site of sites" [ngValue]="site.siteId" (click)="siteSelected.emit(site.siteId)">{{site.siteName}}</option>
-        </select> 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Site Name</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let site of sites | paginate: { itemsPerPage: 20, currentPage: p }" (click)="siteSelected.emit(site.siteId)" >
-                    <td>{{site.siteName}}</td>
-                </tr>
-            </tbody>
-        </table>
-        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+  <div class="col-12">
+      <form>
+        <h4>Available sites</h4>
+            <mat-form-field appearance="fill">
+              <mat-label>Choose a site</mat-label>
+              <mat-select [formControl]="websiteCtrl" #singleSelect>
+                <mat-option>
+                  <ngx-mat-select-search [formControl]="websiteFilterCtrl"
+                  placeholderLabel="Search site ..."
+                  noEntriesFoundLabel=" no matching site found">
+                </ngx-mat-select-search>
+                </mat-option>
+            
+                <mat-option *ngFor="let site of filteredSites | async" [value]="site">
+                  {{site.siteName}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+      </form>
     </div>
+</div>
+<div class="row">
+  <div class="col-12">
+      <file-upload [control]="fileUploadControl">
+          <ng-template let-isFileDragDropAvailable="isFileDragDropAvailable" #placeholder>
+          <div *ngIf="fileUploadControl.size === 0">
+                  <span *ngIf="isFileDragDropAvailable" ><strong>Drag and drop</strong> file</span><br/>
+                  <span *ngIf="isFileDragDropAvailable">or click here</span>
+              </div>
+          </ng-template>
+
+          <ng-template let-i="index" let-file="file" let-control="control" #item>
+              <div class="file-info" (click)="control.removeFile(file)">
+                  <span class="file-name">{{ file.name }}</span>
+              </div>
+          </ng-template>
+      </file-upload>
+  </div>
+  <div class="row">
+    <div class="col-3"></div>
+    <div class="col-md-6">
+      <button class="btn btn-secondary">Clear Files</button> &nbsp;
+      <button class="btn btn-secondary">Import Timesheet</button>
+    </div>
+    <div class="col-3"></div>
+  </div>
 </div>

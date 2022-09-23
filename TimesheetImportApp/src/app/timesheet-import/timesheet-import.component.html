@@ -2,15 +2,13 @@
     <h1 class="display-4 text-center">Timesheet Import</h1>
 </div>
 <div class="row">
+    <div class="col-md-3">
+        
+    </div>
     <div class="col-md-6">
-        <app-timesheet-sites [original-site-list]="sites"
-                             (site-selected)="siteSelected($event)">
+        <app-timesheet-sites [original-site-list]="sites">
 
         </app-timesheet-sites>
     </div>
-    <div class="col-md-6">
-        <app-timesheet-upload *ngIf="selectedSite" [selected-site]="selectedSite">
-
-        </app-timesheet-upload>
-    </div>
+    <div class="col-md-3"></div>
 </div>

@@ -1,6 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { FileUploadControl, FileUploadValidators } from '@iplab/ngx-file-upload';
 import { BehaviorSubject, Subscription } from 'rxjs';
+import  * as _ from "lodash";
 @Component({
   selector: 'app-timesheet-upload',
   templateUrl: './timesheet-upload.component.html',
@@ -8,15 +9,32 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 })
 export class TimesheetUploadComponent implements OnInit {
   constructor() { }
-  private subscription: Subscription = new Subscription;
-  @Input('selected-site') selectedSite!: TimesheetImport.ITimesheetSite;
+  subscription: Subscription = new Subscription;
+  @Input('original-site-list') siteListWithoutFilter: TimesheetImport.ITimesheetSite[] = [];
   allowedMediaTypes: string[] = [
     "file_extension/xlsx"
   ]
   public fileUploadControl = new FileUploadControl({ listVisible: true, multiple: false, accept: this.allowedMediaTypes}, [FileUploadValidators.accept(this.allowedMediaTypes), FileUploadValidators.filesLimit(1)]);
   public readonly uploadedFile: BehaviorSubject<string> = new BehaviorSubject("");
+  
+  selectedValue: string = "-1";
+
+  foods: Food[] = [
+    {value: 'steak-0', viewValue: 'Steak'},
+    {value: 'pizza-1', viewValue: 'Pizza'},
+    {value: 'tacos-2', viewValue: 'Tacos'},
+  ];
+  
   ngOnInit(): void {
     this.subscription = this.fileUploadControl.valueChanges.subscribe((values: Array<File>) => this.getExcelFile(values[0]));
+  }
+
+  ngOnChanges(changes: SimpleChanges)
+  {
+    if(changes['siteListWithoutFilter'].currentValue != changes['siteListWithoutFilter'].previousValue){
+      this.siteListWithoutFilter =  _.orderBy(this.siteListWithoutFilter, ['siteName'], "asc");
+      this.siteListWithoutFilter.splice(0, 0, {siteId:'-1', siteName:'None'});
+    }
   }
 
   private getExcelFile(file: File): void {
@@ -35,3 +53,9 @@ export class TimesheetUploadComponent implements OnInit {
 }
 
 }
+
+interface Food {
+  value: string;
+  viewValue: string;
+}
+

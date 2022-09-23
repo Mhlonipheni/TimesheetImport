@@ -1,15 +1,38 @@
-<p>{{selectedSite.siteName}}</p>
-<file-upload [control]="fileUploadControl">
-    <ng-template let-isFileDragDropAvailable="isFileDragDropAvailable" #placeholder>
-       <div *ngIf="fileUploadControl.size === 0">
-            <span *ngIf="isFileDragDropAvailable">drop or click</span>
-            <span *ngIf="!isFileDragDropAvailable">click</span>
-        </div>
-    </ng-template>
+<div class="row">
 
-    <ng-template let-i="index" let-file="file" let-control="control" #item>
-        <div class="file-info" (click)="control.removeFile(file)">
-            <span class="file-name">{{ file.name }}</span>
-        </div>
-    </ng-template>
-</file-upload>
+    
+    <div class="col-12">
+
+        <form>
+            <h4>Available sites</h4>
+            <mat-form-field appearance="fill">
+              <mat-label>Choose a site</mat-label>
+              <mat-select [(ngModel)]="selectedValue" name="site">
+                <mat-option *ngFor="let site of siteListWithoutFilter" [value]="site.siteId">
+                    {{site.siteName}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <p> Selected food: {{selectedValue}} </p>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <file-upload [control]="fileUploadControl">
+            <ng-template let-isFileDragDropAvailable="isFileDragDropAvailable" #placeholder>
+            <div *ngIf="fileUploadControl.size === 0">
+                    <span *ngIf="isFileDragDropAvailable">drop or click</span>
+                    <span *ngIf="!isFileDragDropAvailable">click</span>
+                </div>
+            </ng-template>
+
+            <ng-template let-i="index" let-file="file" let-control="control" #item>
+                <div class="file-info" (click)="control.removeFile(file)">
+                    <span class="file-name">{{ file.name }}</span>
+                </div>
+            </ng-template>
+        </file-upload>
+    </div>
+</div>
