@@ -14,15 +14,12 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { AppComponent } from './app.component';
 
 import { TimesheetImportComponent } from './timesheet-import/timesheet-import.component';
-import { TimesheetSitesComponent } from './timesheet-import/timesheet-sites/timesheet-sites.component';
-import { TimesheetUploadComponent } from './timesheet-import/timesheet-upload/timesheet-upload.component';
+
 
 @NgModule({
   declarations: [
     AppComponent,
-    TimesheetImportComponent,
-    TimesheetSitesComponent,
-    TimesheetUploadComponent
+    TimesheetImportComponent
   ],
   imports: [
     BrowserModule,

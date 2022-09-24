@@ -24,5 +24,22 @@ namespace TimesheetImportAPI.Controllers
             var result = await timesheetSiteService.GetTimesheetSites();
             return result.Map();
         }
+
+        [HttpPost]
+        [Produces(typeof(TimesheetImportResult))]
+        public async Task<ActionResult<TimesheetImportResult>> Import(IFormFile request)
+        {
+            if(request == null)
+            {
+                return BadRequest();
+            }
+            TimesheetImportResult timesheetImportResult = new TimesheetImportResult()
+            {
+                Success = true,
+                Notifications = new List<Notification>()
+
+            };
+            return await Task.FromResult(timesheetImportResult).ConfigureAwait(false);
+        }
     }
 }

@@ -13,14 +13,8 @@ export class TimesheetImportService {
     return this.restService.get<TimesheetImport.ITimesheetSite[]>('/api/timesheetimport/GetTimesheetSites');
   }
 
-  getWeather(): Observable<WeatherForecast[]> {
-    return this.http.get<WeatherForecast[]>('/api/weatherforecast/Get');
+  postExcelFile(file: File): Observable<TimesheetImport.ITimesheetImportResult> {
+    return this.http.post<TimesheetImport.ITimesheetImportResult>('/api/timesheetimport/Import', file );
   }
 }
 
-interface WeatherForecast {
-  date: string;
-  temperatureC: number;
-  temperatureF: number;
-  summary: string;
-}

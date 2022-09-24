@@ -2,13 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TimesheetImportComponent } from './timesheet-import.component';
 
-describe('TimesheetImportComponent', () => {
+describe('TimesheetSitesComponent', () => {
   let component: TimesheetImportComponent;
   let fixture: ComponentFixture<TimesheetImportComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TimesheetImportComponent ]
+      declarations: [TimesheetImportComponent ]
     })
     .compileComponents();
 

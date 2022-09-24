@@ -11,7 +11,7 @@ declare namespace TimesheetImport {
 
     interface INotification{
         lineNumber: string;
-        errorMessage: string;
+        Message: string;
     }
 
 }
