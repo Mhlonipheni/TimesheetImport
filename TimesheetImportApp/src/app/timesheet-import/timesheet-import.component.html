@@ -31,7 +31,8 @@
     </div>
     <div class="row">
       <div class="col-12">
-          <file-upload [control]="fileUploadControl">
+
+          <file-upload *ngIf="!fileUploadInProgress; else spinner" [control]="fileUploadControl">
               <ng-template let-isFileDragDropAvailable="isFileDragDropAvailable" #placeholder>
               <div *ngIf="fileUploadControl.size === 0">
                       <span *ngIf="isFileDragDropAvailable" ><strong>Drag and drop</strong> file</span><br/>
@@ -45,6 +46,10 @@
                   </div>
               </ng-template>
           </file-upload>
+          <ng-template #spinner>
+            <mat-spinner></mat-spinner>
+          </ng-template>
+          
       </div>
       <div class="row">
         <div class="col-3"></div>

@@ -13,7 +13,7 @@ export class TimesheetImportService {
     return this.restService.get<TimesheetImport.ITimesheetSite[]>('/api/timesheetimport/GetTimesheetSites');
   }
 
-  upload(file: File): Observable<HttpEvent<any>> {
+  upload(file: File): Observable<HttpEvent<TimesheetImport.ITimesheetImportResult>> {
     const formData: FormData = new FormData();
 
     formData.append('file', file);

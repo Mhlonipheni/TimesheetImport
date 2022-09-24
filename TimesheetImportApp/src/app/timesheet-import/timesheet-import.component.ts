@@ -8,6 +8,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { TimesheetImportService } from '../providers/timesheet-import.service';
 import * as _ from 'lodash';
 import { HttpEventType } from '@angular/common/http';
+
 @Component({
   selector: 'app-timesheet-import',
   templateUrl: './timesheet-import.component.html',
@@ -29,7 +30,7 @@ export class TimesheetImportComponent implements OnInit {
   public siteListWithoutFilter: TimesheetImport.ITimesheetSite[] = [];
   siteFilter!: string;
   clearSearchInput: boolean = true;
-
+  fileUploadInProgress: boolean = false;
   allowedMediaTypes: string[] = [
     "file_extension/xlsx"
   ]
@@ -62,12 +63,19 @@ export class TimesheetImportComponent implements OnInit {
     let file = this.fileUploadControl.value[0];
     if(file)
     {
-      this.timesheetService.upload(file).subscribe((event: any) =>
+      this.fileUploadInProgress = true;
+      this.timesheetService.upload(file).subscribe(result =>
       {
-        if(event.type ==  HttpEventType.UploadProgress)
+        if(result.type == HttpEventType.UploadProgress)
         {
 
         }
+
+        if(result.type == HttpEventType.Response)
+        {
+          this.fileUploadInProgress = false;
+        }
+        
       });
     }
   }

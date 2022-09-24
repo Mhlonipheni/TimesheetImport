@@ -27,10 +27,12 @@ namespace TimesheetImportAPI.Controllers
 
         [HttpPost]
         [Produces(typeof(TimesheetImportResult))]
-        public async Task<ActionResult<TimesheetImportResult>> Import()
+        public async Task<ActionResult<TimesheetImportResult>> Import([FromForm] IFormCollection formFileCollection)
         {
             //get the file like below
-            var file = Request.Form.Files[0];
+            //Request.Form.Files
+            IFormFile formFile = formFileCollection.Files[0];
+            var fileRequest = formFile.Map();
            
             TimesheetImportResult timesheetImportResult = new TimesheetImportResult()
             {

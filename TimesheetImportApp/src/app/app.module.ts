@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AppComponent } from './app.component';
 
 import { TimesheetImportComponent } from './timesheet-import/timesheet-import.component';
@@ -32,7 +32,8 @@ import { TimesheetImportComponent } from './timesheet-import/timesheet-import.co
     MatButtonModule,
     MatFormFieldModule,
     NgxMatSelectSearchModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatProgressSpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]
