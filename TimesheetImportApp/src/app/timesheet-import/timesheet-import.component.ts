@@ -7,6 +7,7 @@ import { FileUploadControl, FileUploadValidators } from '@iplab/ngx-file-upload'
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { TimesheetImportService } from '../providers/timesheet-import.service';
 import * as _ from 'lodash';
+import { HttpEventType } from '@angular/common/http';
 @Component({
   selector: 'app-timesheet-import',
   templateUrl: './timesheet-import.component.html',
@@ -49,15 +50,6 @@ export class TimesheetImportComponent implements OnInit {
       }));
   }
 
-  ngOnChanges(changes: SimpleChanges)
-  {
-    if(changes['siteListWithoutFilter'].currentValue != changes['siteListWithoutFilter'].previousValue){
-     
-  
-    
-    }
-  }
-
   ngAfterViewInit() {
     this.setInitialValue();
   }
@@ -70,7 +62,13 @@ export class TimesheetImportComponent implements OnInit {
     let file = this.fileUploadControl.value[0];
     if(file)
     {
-      
+      this.timesheetService.upload(file).subscribe((event: any) =>
+      {
+        if(event.type ==  HttpEventType.UploadProgress)
+        {
+
+        }
+      });
     }
   }
 
