@@ -8,6 +8,8 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { TimesheetImportService } from '../providers/timesheet-import.service';
 import * as _ from 'lodash';
 import { HttpEventType } from '@angular/common/http';
+import { ThemePalette } from '@angular/material/core';
+import { ProgressSpinnerMode } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-timesheet-import',
@@ -36,6 +38,10 @@ export class TimesheetImportComponent implements OnInit {
   ]
   public fileUploadControl = new FileUploadControl({ listVisible: true, multiple: false, accept: this.allowedMediaTypes}, [FileUploadValidators.accept(this.allowedMediaTypes), FileUploadValidators.filesLimit(1)]);
   public readonly uploadedFile: BehaviorSubject<string> = new BehaviorSubject("");
+
+  color: ThemePalette = 'primary';
+  mode: ProgressSpinnerMode = 'indeterminate';
+  value = 90;
   ngOnInit(): void {
     this.subscriptions.add(this.timesheetService.getTimeSheetSites().subscribe(result => {
       this.siteListWithoutFilter = _.orderBy(result, 'siteName', 'asc');
@@ -64,7 +70,7 @@ export class TimesheetImportComponent implements OnInit {
     if(file)
     {
       this.fileUploadInProgress = true;
-      this.timesheetService.upload(file).subscribe(result =>
+      this.timesheetService.upload({siteId: this.websiteCtrl.value.siteId, File: file}).subscribe(result =>
       {
         if(result.type == HttpEventType.UploadProgress)
         {

@@ -4,20 +4,23 @@ namespace TimesheetImportAPI.Mappers
 {
     public static class FormFilemapper
     {
-        public static FileUploadRequest? Map(this IFormFile formFile)
+        public static TimesheetImport.TimesheetModels.FileUploadRequest? Map(this FileUploadRequest fileUploadRequest)
         {
-            byte[]? fileBytes = null;
+            MemoryStream? uploadFile = null;
 
-            if (formFile != null && formFile.Length != 0)
+            if (fileUploadRequest != null && fileUploadRequest.FormCollection != null && fileUploadRequest.FormCollection?.Files.Count != 0)
             {
                 using (var file = new MemoryStream())
                 {
-                    formFile.CopyTo(file);
-                    fileBytes = file.ToArray();
+                    fileUploadRequest.FormCollection?.Files[0].CopyTo(file);
+                    uploadFile = file;
                 }
 
-
-                return new FileUploadRequest(formFile.FileName, formFile.ContentType, fileBytes);
+                return new TimesheetImport.TimesheetModels.FileUploadRequest()
+                {
+                    File = uploadFile,
+                    SiteId = fileUploadRequest.SiteId,
+                };
             }
             return null;
         }

@@ -14,4 +14,10 @@ declare namespace TimesheetImport {
         Message: string;
     }
 
+    interface FileUploadRequest
+    {
+        siteId: string;
+        File: File;
+    }
+
 }

@@ -13,11 +13,11 @@ export class TimesheetImportService {
     return this.restService.get<TimesheetImport.ITimesheetSite[]>('/api/timesheetimport/GetTimesheetSites');
   }
 
-  upload(file: File): Observable<HttpEvent<TimesheetImport.ITimesheetImportResult>> {
+  upload(fileUploadRequest: TimesheetImport.FileUploadRequest): Observable<HttpEvent<TimesheetImport.ITimesheetImportResult>> {
     const formData: FormData = new FormData();
 
-    formData.append('file', file);
-
+    formData.append('file', fileUploadRequest.File);
+    formData.append('siteId', fileUploadRequest.siteId);
     const req = new HttpRequest('POST', '/api/timesheetimport/Import', formData, {
       reportProgress: true,
       responseType: 'json'

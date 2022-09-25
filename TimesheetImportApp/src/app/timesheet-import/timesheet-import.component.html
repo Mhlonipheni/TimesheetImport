@@ -47,7 +47,14 @@
               </ng-template>
           </file-upload>
           <ng-template #spinner>
-            <mat-spinner></mat-spinner>
+            <mat-card class="example-section">
+              <mat-card-content>
+                <mat-progress-spinner [mode]="mode" [color]="color" [value]="value">
+
+                </mat-progress-spinner>
+              </mat-card-content>
+            </mat-card>
+           
           </ng-template>
           
       </div>
