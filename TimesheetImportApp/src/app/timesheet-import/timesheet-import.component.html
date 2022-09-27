@@ -4,7 +4,6 @@
 </div>
 <div class="row">
   <div class="col-md-3">
-      
   </div>
   <div class="col-md-6">
     <div class="row">
@@ -13,9 +12,9 @@
             <h4>Available sites</h4>
                 <mat-form-field appearance="fill">
                   <mat-label>Choose a site</mat-label>
-                  <mat-select [formControl]="websiteCtrl" #singleSelect>
+                  <mat-select [formControl]="siteCtrl" #singleSelect>
                     <mat-option>
-                      <ngx-mat-select-search [formControl]="websiteFilterCtrl"
+                      <ngx-mat-select-search [formControl]="siteFilterCtrl"
                       placeholderLabel="Search site ..."
                       noEntriesFoundLabel=" no matching site found">
                     </ngx-mat-select-search>
@@ -29,7 +28,7 @@
           </form>
         </div>
     </div>
-    <div class="row">
+    <div class="row py-3">
       <div class="col-12">
 
           <file-upload *ngIf="!fileUploadInProgress; else spinner" [control]="fileUploadControl">
@@ -50,7 +49,6 @@
             <mat-card class="example-section">
               <mat-card-content>
                 <mat-progress-spinner [mode]="mode" [color]="color" [value]="value">
-
                 </mat-progress-spinner>
               </mat-card-content>
             </mat-card>
@@ -58,16 +56,16 @@
           </ng-template>
           
       </div>
-      <div class="row">
-        <div class="col-3"></div>
-        <div class="col-md-6">
-          <button class="btn btn-secondary" (click)="clearFiles()">Clear Files</button> &nbsp;
-          <button class="btn btn-secondary" (click)="importTimesheet()">Import Timesheet</button>
-        </div>
-        <div class="col-3"></div>
-      </div>
-    </div>
     
+    </div>
+    <div class="row">
+      <div class="col-3"></div>
+      <div class="col-md-6">
+        <button class="btn th-primary" (click)="clearFiles()">Clear Files</button> &nbsp;
+        <button class="btn th-primary" (click)="importTimesheet()">Import Timesheet</button>
+      </div>
+      <div class="col-3"></div>
+    </div>
   </div>
   <div class="col-md-3"></div>
 </div>

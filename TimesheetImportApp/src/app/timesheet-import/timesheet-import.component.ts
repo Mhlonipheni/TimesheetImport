@@ -10,7 +10,7 @@ import * as _ from 'lodash';
 import { HttpEventType } from '@angular/common/http';
 import { ThemePalette } from '@angular/material/core';
 import { ProgressSpinnerMode } from '@angular/material/progress-spinner';
-
+import { ToastrService } from 'ngx-toastr'
 @Component({
   selector: 'app-timesheet-import',
   templateUrl: './timesheet-import.component.html',
@@ -19,13 +19,14 @@ import { ProgressSpinnerMode } from '@angular/material/progress-spinner';
 export class TimesheetImportComponent implements OnInit {
   private subscriptions = new Subscription();
   protected _onDestroy = new Subject();
-  constructor(private timesheetService: TimesheetImportService) {
+  constructor(private timesheetService: TimesheetImportService,
+    private toastrService: ToastrService) {
   }
 
   selectedSite!: TimesheetImport.ITimesheetSite;
 
-  public websiteCtrl: FormControl = new FormControl();
-  public websiteFilterCtrl: FormControl = new FormControl();
+  public siteCtrl: FormControl = new FormControl();
+  public siteFilterCtrl: FormControl = new FormControl();
   public filteredSites: ReplaySubject<TimesheetImport.ITimesheetSite[]> = new ReplaySubject(1);
   @ViewChild('singleSelect', { static: true })singleSelect!: MatSelect;
 
@@ -34,7 +35,7 @@ export class TimesheetImportComponent implements OnInit {
   clearSearchInput: boolean = true;
   fileUploadInProgress: boolean = false;
   allowedMediaTypes: string[] = [
-    "file_extension/xlsx"
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
   ]
   public fileUploadControl = new FileUploadControl({ listVisible: true, multiple: false, accept: this.allowedMediaTypes}, [FileUploadValidators.accept(this.allowedMediaTypes), FileUploadValidators.filesLimit(1)]);
   public readonly uploadedFile: BehaviorSubject<string> = new BehaviorSubject("");
@@ -48,9 +49,9 @@ export class TimesheetImportComponent implements OnInit {
       this.filterSites();
     }));
     this.subscriptions.add(this.fileUploadControl.valueChanges.subscribe((values: Array<File>) => this.getExcelFile(values[0])));
-    this.websiteCtrl.setValue(this.siteListWithoutFilter[1]);
+    this.siteCtrl.setValue(this.siteListWithoutFilter[1]);
     this.filteredSites.next(this.siteListWithoutFilter.slice());
-    this.subscriptions.add(this.websiteFilterCtrl.valueChanges
+    this.subscriptions.add(this.siteFilterCtrl.valueChanges
       .pipe(takeUntil(this._onDestroy))
       .subscribe(() => {
         this.filterSites();
@@ -63,6 +64,7 @@ export class TimesheetImportComponent implements OnInit {
 
   public clearFiles(): void {
     this.fileUploadControl.setValue([]);
+    this.fileUploadControl.enable(true);
   }
 
   public importTimesheet(){
@@ -70,7 +72,7 @@ export class TimesheetImportComponent implements OnInit {
     if(file)
     {
       this.fileUploadInProgress = true;
-      this.timesheetService.upload({siteId: this.websiteCtrl.value.siteId, File: file}).subscribe(result =>
+      this.timesheetService.upload({siteId: this.siteCtrl.value.siteId, File: file}).subscribe(result =>
       {
         if(result.type == HttpEventType.UploadProgress)
         {
@@ -80,6 +82,9 @@ export class TimesheetImportComponent implements OnInit {
         if(result.type == HttpEventType.Response)
         {
           this.fileUploadInProgress = false;
+          this.fileUploadControl.clear();
+          this.fileUploadControl.enable(true);
+          this.toastrService.success("Timesheet imported successfully", "Timesheet Import", {positionClass:'toast-top-right'});
         }
         
       });
@@ -99,7 +104,7 @@ export class TimesheetImportComponent implements OnInit {
       return;
     }
   
-    let search = this.websiteFilterCtrl.value;
+    let search = this.siteFilterCtrl.value;
     if (!search) {
       this.filteredSites.next(this.siteListWithoutFilter.slice());
       return;
@@ -108,7 +113,7 @@ export class TimesheetImportComponent implements OnInit {
     }
   
     this.filteredSites.next(
-      this.siteListWithoutFilter.filter(site => site.siteName.toLowerCase().indexOf(search) > -1)
+      this.siteListWithoutFilter.filter(site => site.siteName.toLowerCase().startsWith(search) == true)
     );
   }
 
@@ -122,6 +127,7 @@ export class TimesheetImportComponent implements OnInit {
         }
         };
         fr.readAsDataURL(file);
+        this.fileUploadControl.enable(false);
     } else {
         this.uploadedFile.next("");
     }

@@ -3,3 +3,8 @@
     align-content: center;
     align-items: center;
   }
+
+  .th-primary {
+    color: #fff;
+    background-color: #00c0e8;
+  }

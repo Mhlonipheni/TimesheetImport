@@ -5,7 +5,7 @@ import { HttpClientModule } from '@angular/common/http'
 import {NgxPaginationModule} from 'ngx-pagination';
 import { FileUploadModule } from '@iplab/ngx-file-upload';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
+import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -35,9 +35,12 @@ import { TimesheetImportComponent } from './timesheet-import/timesheet-import.co
     NgxMatSelectSearchModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule,
-    MatCardModule
+    MatCardModule,
+    ToastrModule.forRoot({
+      positionClass: 'toast-bottom-center'
+    })
   ],
-  providers: [],
+  providers: [ToastrService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

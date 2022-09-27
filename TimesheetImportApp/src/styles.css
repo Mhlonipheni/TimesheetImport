@@ -1,6 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
 /* Add application styles & imports to this file! */
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
+/* regular style toast */
+@import '~ngx-toastr/toastr.css';
+
+/* bootstrap style toast
+// or import a bootstrap 4 alert styled design (SASS ONLY)
+// should be after your bootstrap imports, it uses bs4 variables, mixins, functions */
 
 .mat-select-panel{
   position: absolute;
@@ -26,4 +32,9 @@
 
 .mat-select-panel ng-animating {
   visibility: hidden;
+}
+
+.global-theme-dark {
+  font-family: Arial;
+  background-color: #1b1b1b;
 }
