@@ -9,6 +9,7 @@ namespace TimesheetImport.Infrastructure.Repository
 {
     public interface ITimesheetSiteRepository
     {
-        Task<List<TimesheetSiteModel>> GetTimesheetSites();
+        Task<List<TimesheetSiteModel>> GetTimesheetSites();       
+        Task SaveTimesheet(List<Timesheet> timesheets);       
     }
 }
