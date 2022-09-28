@@ -14,11 +14,9 @@ namespace TimesheetImportAPI.Controllers
     public class TimesheetImportController : Controller
     {
         private readonly ITimesheetSiteService timesheetSiteService;
-        private readonly ITimesheetSiteRepository repository;
         public TimesheetImportController(ITimesheetSiteService timesheetSiteService)
         {
             this.timesheetSiteService = timesheetSiteService;
-            this.repository = repository;
 
         }
         [HttpGet]
@@ -39,11 +37,10 @@ namespace TimesheetImportAPI.Controllers
 
 
             //this return the POCO object. 
-            var result = await timesheetSiteService.FromFileToTimesheets(fileRequest);
+            await timesheetSiteService.ImportToTimesheets(fileRequest).ConfigureAwait(false);
 
             //call the repo to save using EF6
 
-            repository.SaveTimesheet(result);
 
 
             TimesheetImportResult timesheetImportResult = new TimesheetImportResult()

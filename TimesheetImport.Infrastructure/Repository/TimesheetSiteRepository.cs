@@ -39,7 +39,7 @@ namespace TimesheetImport.Infrastructure.Repository
             {
                 //var s = new Timesheet() { Name = "Sim" };
                 ctx.Timesheets.AddRange(timesheets);
-                ctx.SaveChanges();
+                await ctx.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }

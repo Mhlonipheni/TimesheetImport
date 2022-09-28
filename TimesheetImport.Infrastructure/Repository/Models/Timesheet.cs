@@ -12,7 +12,7 @@ namespace TimesheetImport.Infrastructure.Repository.Models
         public string EmployeeId { get; set; }
         public string Name { get; set; }
         public string Surname { get; set; }
-        public string? IdNumber { get; set; }
+        public string IdNumber { get; set; }
         public DateTime? Start { get; set; }
         public DateTime? End { get; set; }
     }

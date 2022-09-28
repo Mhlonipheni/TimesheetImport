@@ -9,7 +9,7 @@ namespace TimesheetImport.TimesheetModels
 {
     public class FileUploadRequest
     {
-        public string? SiteId { get; set; }
+        public string SiteId { get; set; }
        public  MemoryStream File { get; set; }
     }
 }
