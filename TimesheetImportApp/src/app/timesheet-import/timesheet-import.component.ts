@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { MatSelect } from '@angular/material/select';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ReplaySubject, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { FileUploadControl, FileUploadValidators } from '@iplab/ngx-file-upload';
@@ -25,6 +25,7 @@ export class TimesheetImportComponent implements OnInit {
 
   selectedSite!: TimesheetImport.ITimesheetSite;
 
+
   public siteCtrl: FormControl = new FormControl();
   public siteFilterCtrl: FormControl = new FormControl();
   public filteredSites: ReplaySubject<TimesheetImport.ITimesheetSite[]> = new ReplaySubject(1);
@@ -34,6 +35,7 @@ export class TimesheetImportComponent implements OnInit {
   siteFilter!: string;
   clearSearchInput: boolean = true;
   fileUploadInProgress: boolean = false;
+  showError: boolean = false;
   allowedMediaTypes: string[] = [
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
   ]
@@ -44,6 +46,7 @@ export class TimesheetImportComponent implements OnInit {
   mode: ProgressSpinnerMode = 'indeterminate';
   value = 90;
   ngOnInit(): void {
+  
     this.subscriptions.add(this.timesheetService.getTimeSheetSites().subscribe(result => {
       this.siteListWithoutFilter = _.orderBy(result, 'siteName', 'asc');
       this.filterSites();
@@ -69,9 +72,10 @@ export class TimesheetImportComponent implements OnInit {
 
   public importTimesheet(){
     let file = this.fileUploadControl.value[0];
-    if(file)
+    if(file && this.siteCtrl.value)
     {
       this.fileUploadInProgress = true;
+      this.showError = false;
       this.timesheetService.upload({siteId: this.siteCtrl.value.siteId, File: file}).subscribe(result =>
       {
         if(result.type == HttpEventType.UploadProgress)
@@ -88,6 +92,10 @@ export class TimesheetImportComponent implements OnInit {
         }
         
       });
+    }
+    else
+    {
+      this.showError = true;
     }
   }
 

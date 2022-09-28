@@ -12,19 +12,21 @@
             <h4>Available sites</h4>
                 <mat-form-field appearance="fill">
                   <mat-label>Choose a site</mat-label>
-                  <mat-select [formControl]="siteCtrl" #singleSelect>
+                  <mat-select [formControl]="siteCtrl" #singleSelect required>
                     <mat-option>
                       <ngx-mat-select-search [formControl]="siteFilterCtrl"
                       placeholderLabel="Search site ..."
                       noEntriesFoundLabel=" no matching site found">
                     </ngx-mat-select-search>
                     </mat-option>
-                
                     <mat-option *ngFor="let site of filteredSites | async" [value]="site">
                       {{site.siteName}}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
+                <mat-error *ngIf="!siteCtrl.value">
+                  Site is a required field.
+                </mat-error>
           </form>
         </div>
     </div>
@@ -46,13 +48,11 @@
               </ng-template>
           </file-upload>
           <ng-template #spinner>
-            <mat-card class="example-section">
-              <mat-card-content>
-                <mat-progress-spinner [mode]="mode" [color]="color" [value]="value">
-                </mat-progress-spinner>
-              </mat-card-content>
-            </mat-card>
-           
+            <div class="overlay d-flex justify-content-center">
+              <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
           </ng-template>
           
       </div>
@@ -61,8 +61,8 @@
     <div class="row">
       <div class="col-3"></div>
       <div class="col-md-6">
-        <button class="btn th-primary" (click)="clearFiles()">Clear Files</button> &nbsp;
-        <button class="btn th-primary" (click)="importTimesheet()">Import Timesheet</button>
+        <button type="button" class="btn th-primary has-shadow-hover" (click)="clearFiles()" [disabled]="fileUploadControl.size === 0">Clear Files</button> &nbsp;
+        <button type="button" class="btn th-primary has-shadow-hover" (click)="importTimesheet()" [disabled]="fileUploadControl.size === 0">Import Timesheet</button>
       </div>
       <div class="col-3"></div>
     </div>

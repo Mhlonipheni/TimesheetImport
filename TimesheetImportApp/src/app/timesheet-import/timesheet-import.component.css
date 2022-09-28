@@ -1,10 +1,17 @@
-.example-section {
-    display: flex;
-    align-content: center;
-    align-items: center;
-  }
 
   .th-primary {
     color: #fff;
     background-color: #00c0e8;
+  }
+
+  .has-shadow-hover:hover {
+        box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.35);
+        background-color:#00c0e8;
+        color: #fff;
+  }
+
+  .has-shadow-hover:focus {
+        box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.35);
+        background-color:#00c0e8;
+        color: #fff;
   }
