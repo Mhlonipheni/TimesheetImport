@@ -13,6 +13,7 @@ namespace TimesheetImportAPI.Mappers
                 using (var file = new MemoryStream())
                 {
                     fileUploadRequest.FormCollection?.Files[0].CopyTo(file);
+                    file.Position = 0;                      
                     uploadFile = file;
                 }
 

@@ -1,19 +1,12 @@
 ﻿using Dapper;
-using ExcelDataReader;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using TimesheetImport.Infrastructure.Repository.Base;
 using TimesheetImport.Infrastructure.Repository.Models;
 using TimesheetImport.Infrastructure.Repository.SqlStatements;
-using TimesheetImport.TimesheetModels;
 
 namespace TimesheetImport.Infrastructure.Repository
 {
@@ -35,7 +28,7 @@ namespace TimesheetImport.Infrastructure.Repository
         
         public async Task SaveTimesheet(List<Timesheet> timesheets)
         {
-            using (var ctx = new TimesheetDBContext(Connection.ConnectionString))
+            using (var ctx = new RMSContext())
             {
                 //var s = new Timesheet() { Name = "Sim" };
                 ctx.Timesheets.AddRange(timesheets);

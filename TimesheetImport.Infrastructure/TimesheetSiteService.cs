@@ -1,14 +1,7 @@
-﻿using ExcelDataReader;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using TimesheetImport.Infrastructure.Repository;
 using TimesheetImport.Infrastructure.Repository.ModelMappings;
-using TimesheetImport.Infrastructure.Repository.Models;
 using TimesheetImport.TimesheetModels;
 
 namespace TimesheetImport.Infrastructure
@@ -27,7 +20,7 @@ namespace TimesheetImport.Infrastructure
         }
 
         public async Task ImportToTimesheets(FileUploadRequest fileUploadRequest)
-        {
+        {          
             var timesheests = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest);
 
             await repository.SaveTimesheet(timesheests).ConfigureAwait(false);

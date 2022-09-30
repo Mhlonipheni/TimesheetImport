@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using TimesheetImport.Infrastructure.Repository.Models;
 using TimesheetImport.TimesheetModels;
@@ -25,11 +26,9 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             DateTime endDate = DateTime.Now;
             var timesheets = new List<Timesheet>();
 
-            //using (var stream = File.Open("Timesheet.xlsx", FileMode.Open, FileAccess.Read))
-            // {
+            MemoryStream newStr = new MemoryStream(fileUploadRequest.File.ToArray());
 
-            //using (var reader = ExcelReaderFactory.CreateReader(stream))
-            using (var reader = ExcelReaderFactory.CreateReader(fileUploadRequest.File))
+            using (var reader = ExcelReaderFactory.CreateReader(newStr))
             {
                 var result = reader.AsDataSet();
                 bool IsNextLineTimesheet = false;
@@ -57,68 +56,67 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                             {
                                 timesheets.Add(new Timesheet
                                 {
-                                    EmployeeId = reader.GetString(0),
-                                    Surname = reader.GetString(1),
-                                    Name = reader.GetString(2),
-                                    IdNumber = reader.GetValue(3)?.ToString(),
-                                    StartDate = sd,
-                                    EndDate = sd.AddHours(rdEndDate),
-                                    CreatedBy = 1, //1,31,35,36,43,44,53 we need to know what this maps to. 
-                                    CreatedDate = DateTime.Now,
-                                    UpdatedBy = 1, // same as created by
-                                    UpdatedDate = DateTime.Now,
-                                    TimeStamp = DateTime.Now,
-                                    Deleted = null,
-                                    Secterr = null, // NULL,- 2147483640,- 1342177274
-                                    WorkflowId = null,
-                                    Status = null,// NULL,Approved,Duplicate,Leave,New,NightShift,Normal,UnApproved
-                                    CompanyId = null, // couple of companies
-                                    PersonId = null,
-                                    OpportunityId = null,
-                                    OrderId = null,
-                                    QuoteId = null, //99
-                                    LeadId = null,
-                                    CaseId = null,
-                                    normalhrs = rdEndDate, //verify this
-                                    overtimehrs = rdEndDate - 8, //anything over than 8 hours is overtime??
-                                    phhrs = 0,//don't this
-                                    nightshifthrs = null,
-                                    sundayhrs = DateTime.Now.DayOfWeek.ToString() == "Sunday" ? rdEndDate : null,
-                                    stage = null,
-                                    siteid = Convert.ToInt32(fileUploadRequest.SiteId),
-                                    prechargesheetid = null,
-                                    breaktimehrs = null, // how to calculate
-                                    normalhrstotal = null, // how to calculate
-                                    normalhrstotal_CID = null, // how to calculate
-                                    overtimehrstotal = null, // how to calculate
-                                    overtimehrstotal_CID = null, // how to calculate
-                                    position = null,
-                                    shift = shift == 6 ? "NormalShift" : "NightShift",
-                                    starttime = shift.ToString(),
-                                    endtime = shift == 6 ? "2pm" : "8pm",
-                                    approved = null, //Y,N
-                                    placeholder1 = null,
-                                    nightshifthrstotal = null,
-                                    nightshifthrstotal_CID = null, //  how to get this
-                                    employeeidsearch = 1, // how to get this
-                                    positionsearch = 1,// hot to get this
-                                    includedweekrun = null,
-                                    invoiced = null, 
-                                    workedhrs = rdEndDate,
-                                    startdatesearch = null,
-                                    enddatesearch = null,
-                                    Source = "Import", //CRM, Payrun
-                                    BatchNo = 1, // how to get this
-                                    calculatedhrs = null, // hot to get this
-                                    payrunid = 1, // how to get this
-                                    week = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
-                                    timesheetrunid = 1,// how to get this
-                                    invoiceid = null,
-                                    calcnewtrainhrs = null, // how to get this
-                                    invoicerunid = null,
-                                    Override = null, //Y,N
-                                    newweek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday)
-                                }) ;
+                                    //TimeTimesheetId auto gen
+                                    TimeCreatedBy = 1, //1,31,35,36,43,44,53 we need to know what this maps to.
+                                    TimeCreatedDate = DateTime.Now,
+                                    TimeUpdatedBy = 1, // same as created by
+                                    TimeUpdatedDate = DateTime.Now,
+                                    TimeTimeStamp = DateTime.Now,
+                                    TimeDeleted = null,
+                                    TimeSecterr = null, // NULL,- 2147483640,- 1342177274
+                                    TimeName = reader.GetString(2),
+                                    TimeWorkflowId = null,
+                                    TimeStatus = null,// NULL,Approved,Duplicate,Leave,New,NightShift,Normal,UnApproved
+                                    TimeCompanyId = null, // couple of companies in DB
+                                    TimePersonId = null,
+                                    TimeOpportunityId = null,
+                                    TimeOrderId = null,
+                                    TimeQuoteId = null,
+                                    TimeLeadId = null,
+                                    TimeCaseId = null,
+                                    TimeEmployeeid = 1,//Convert.(reader.GetValue(3)), //come back
+                                    TimeStartdate = sd,
+                                    TimeEnddate = sd.AddHours(rdEndDate),
+                                    TimeNormalhrs = Convert.ToDecimal(rdEndDate),
+                                    TimeOvertimehrs = Convert.ToDecimal(rdEndDate) - 8, //anything over than 8 hours is overtime??
+                                    TimePhhrs = 0,//don't know this
+                                    TimeNightshifthrs = null,
+                                    TimeSundayhrs = DateTime.Now.DayOfWeek.ToString() == "Sunday" ? Convert.ToDecimal(rdEndDate) : null,
+                                    TimeStage = String.Empty,
+                                    TimeSiteid = Convert.ToInt32(fileUploadRequest.SiteId),
+                                    TimePrechargesheetid = null,
+                                    TimeBreaktimehrs = null, // how to calculate
+                                    TimeNormalhrstotal = null,
+                                    TimeNormalhrstotalCid = null,
+                                    TimeOvertimehrstotal = null,
+                                    TimeOvertimehrstotalCid = null,
+                                    TimePosition = null,
+                                    TimeShift = shift == 6 ? "NormalShift" : "NightShift",
+                                    TimeStarttime = shift.ToString(),
+                                    TimeEndtime = shift == 6 ? "2pm" : "8pm",
+                                    TimeApproved = null, //Y,N
+                                    TimePlaceholder1 = null,
+                                    TimeNightshifthrstotal = null,
+                                    TimeNightshifthrstotalCid = null,
+                                    TimeEmployeeidsearch = null,
+                                    TimePositionsearch = null,
+                                    TimeIncludedweekrun = string.Empty,
+                                    TimeInvoiced = string.Empty,
+                                    TimeWorkedhrs = Convert.ToDecimal(rdEndDate),
+                                    TimeStartdatesearch = null,
+                                    TimeEnddatesearch = null,
+                                    TimeSource = "Import", //CRM, Payrun
+                                    TimeBatchNo = 1, // how to get this
+                                    TimeCalculatedhrs = null,
+                                    TimePayrunid = 1, // how to get this
+                                    TimeWeek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
+                                    TimeTimesheetrunid = 1,// how to get this
+                                    TimeInvoiceid = null,
+                                    TimeCalcnewtrainhrs = null,
+                                    TimeInvoicerunid = null,
+                                    TimeOverride = null, //Y,N
+                                    TimeNewweek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) + 1,
+                                });
                             }
                             j += 4;
                             startDate = startDate.AddDays(1);
@@ -137,7 +135,6 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                     }
                 }
             }
-            //}
             return timesheets;
         }
 
