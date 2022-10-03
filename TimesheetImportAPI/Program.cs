@@ -1,8 +1,11 @@
 using Microsoft.Extensions.Configuration;
+using System.Text;
 using TimesheetImport.Infrastructure;
 using TimesheetImport.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 // Add services to the container.
 
