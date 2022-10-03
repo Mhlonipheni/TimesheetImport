@@ -33,13 +33,21 @@ namespace TimesheetImport.Infrastructure.Repository
             }
         } 
         
-        public async Task SaveTimesheet(List<Timesheet> timesheets)
+        public async Task<TimesheetImportResultModel> SaveTimesheet(List<Timesheet> timesheets)
         {
             using (var ctx = new TimesheetDBContext(Connection.ConnectionString))
             {
                 //var s = new Timesheet() { Name = "Sim" };
                 ctx.Timesheets.AddRange(timesheets);
-                await ctx.SaveChangesAsync().ConfigureAwait(false);
+               var result =  await ctx.SaveChangesAsync().ConfigureAwait(false);
+                return new TimesheetImportResultModel()
+                {
+                    Success = result > 0,
+                    Errors = new List<string>
+                    {
+                       "Import failed"
+                    }
+                };
             }
         }
     }
