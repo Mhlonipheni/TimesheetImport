@@ -11,6 +11,6 @@ namespace TimesheetImport.Infrastructure
     public interface ITimesheetSiteService
     {
         Task<List<TimesheetSite>> GetTimesheetSites();
-        Task ImportToTimesheets(FileUploadRequest fileUploadRequest);
+        Task<TimesheetImportResult> ImportToTimesheets(FileUploadRequest fileUploadRequest);
     }
 }

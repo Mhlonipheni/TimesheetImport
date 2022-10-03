@@ -19,11 +19,13 @@ namespace TimesheetImport.Infrastructure
             return TimesheetSiteMapper.MapFromTimesheetSite(result);
         }
 
-        public async Task ImportToTimesheets(FileUploadRequest fileUploadRequest)
-        {          
+        public async Task<TimesheetImportResult> ImportToTimesheets(FileUploadRequest fileUploadRequest)
+        {
             var timesheests = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest);
 
-            await repository.SaveTimesheet(timesheests).ConfigureAwait(false);
+            var result = await repository.SaveTimesheet(timesheests).ConfigureAwait(false);
+
+            return TimesheetSiteMapper.Map(result);
 
             //let's change this to return some errors.
         }

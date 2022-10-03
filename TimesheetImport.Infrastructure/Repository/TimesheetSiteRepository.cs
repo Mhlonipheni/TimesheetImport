@@ -33,12 +33,17 @@ namespace TimesheetImport.Infrastructure.Repository
                 //var s = new Timesheet() { Name = "Sim" };
                 ctx.Timesheets.AddRange(timesheets);
                var result =  await ctx.SaveChangesAsync().ConfigureAwait(false);
+                var errorMessage = string.Empty;
+                if(result != timesheets.Count)
+                {
+                    errorMessage = "Import Timesheet failed";
+                }
                 return new TimesheetImportResultModel()
                 {
                     Success = result > 0,
                     Errors = new List<string>
                     {
-                       "Import failed"
+                       errorMessage
                     }
                 };
             }
