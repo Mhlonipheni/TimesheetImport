@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace TimesheetImport.TimesheetModels
 {
     public class FileUploadRequest
     {
-        public string SiteId { get; set; }
+        public int SiteId { get; set; }
        public  MemoryStream File { get; set; }
     }
 }

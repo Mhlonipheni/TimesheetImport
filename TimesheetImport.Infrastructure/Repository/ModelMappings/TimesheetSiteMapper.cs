@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using TimesheetImport.Infrastructure.Repository.Models;
 using TimesheetImport.TimesheetModels;
+using Site = TimesheetImport.Infrastructure.Repository.Models.Site;
 
 namespace TimesheetImport.Infrastructure.Repository.ModelMappings
 {
@@ -20,11 +21,22 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             }).ToList();
         }
 
-        public static List<Timesheet> FromFileToTimesheets(FileUploadRequest fileUploadRequest)
+        public static List<Timesheet> FromFileToTimesheets(FileUploadRequest fileUploadRequest, RMSContext rms)
         {
             DateTime startDate = DateTime.Now;
             DateTime endDate = DateTime.Now;
+            var jobName = string.Empty;
             var timesheets = new List<Timesheet>();
+
+            int userId = 1;
+            var batchNo = 0;
+            int secterr = -2147483640;
+            var lasttimesheet = rms.Timesheets.OrderByDescending(o => o.TimeBatchNo).FirstOrDefault();            
+
+            if (lasttimesheet == null || lasttimesheet.TimeBatchNo.HasValue == false)
+                batchNo = 1;
+            else
+                batchNo = lasttimesheet.TimeBatchNo.Value + 1;
 
             MemoryStream newStr = new MemoryStream(fileUploadRequest.File.ToArray());
 
@@ -38,6 +50,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                     {
                         startDate = reader.GetDateTime(0);
                         endDate = reader.GetDateTime(2);
+                        jobName = reader.GetString(3);
                     }
 
                     if (IsNextLineTimesheet && !string.IsNullOrEmpty(reader.GetString(0)))
@@ -49,6 +62,11 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                         double shift = 0;
                         for (int i = 1; i <= 7; i++)
                         {
+                            Employee employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString()).FirstOrDefault();
+                            NewProduct jobPosition = rms.NewProducts.Where(w => w.ProdName == jobName).FirstOrDefault();
+                            Site site = rms.Sites.Where(w => w.SiteSiteId == fileUploadRequest.SiteId).FirstOrDefault();
+                            Company company = rms.Companies.Where(w => w.CompCompanyId == site.SiteCompanyId).FirstOrDefault();
+
                             shift = reader.GetValue(j - 3)?.ToString() == "12pm" ? 12 : 6;
                             var sd = startDate.AddHours(shift);
                             var rdEndDate = Convert.ToDouble(reader.GetValue(j));
@@ -56,25 +74,24 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                             {
                                 timesheets.Add(new Timesheet
                                 {
-                                    //TimeTimesheetId auto gen
-                                    TimeCreatedBy = 1, //1,31,35,36,43,44,53 we need to know what this maps to.
+                                    TimeCreatedBy = userId, //1,31,35,36,43,44,53 we need to know what this maps to.
                                     TimeCreatedDate = DateTime.Now,
-                                    TimeUpdatedBy = 1, // same as created by
+                                    TimeUpdatedBy = userId, // same as created by
                                     TimeUpdatedDate = DateTime.Now,
                                     TimeTimeStamp = DateTime.Now,
                                     TimeDeleted = null,
-                                    TimeSecterr = null, // NULL,- 2147483640,- 1342177274
+                                    TimeSecterr = employee?.EmplSecterr, // NULL,- 2147483640,- 1342177274
                                     TimeName = reader.GetString(2),
                                     TimeWorkflowId = null,
-                                    TimeStatus = null,// NULL,Approved,Duplicate,Leave,New,NightShift,Normal,UnApproved
-                                    TimeCompanyId = null, // couple of companies in DB
+                                    TimeStatus = "New",// NULL,Approved,Duplicate,Leave,New,NightShift,Normal,UnApproved
+                                    TimeCompanyId = company?.CompCompanyId, // couple of companies in DB
                                     TimePersonId = null,
                                     TimeOpportunityId = null,
                                     TimeOrderId = null,
                                     TimeQuoteId = null,
                                     TimeLeadId = null,
                                     TimeCaseId = null,
-                                    TimeEmployeeid = 1,//Convert.(reader.GetValue(3)), //come back
+                                    TimeEmployeeid = employee?.EmplEmployeeId,//Convert.(reader.GetValue(3)), //come back
                                     TimeStartdate = sd,
                                     TimeEnddate = sd.AddHours(rdEndDate),
                                     TimeNormalhrs = Convert.ToDecimal(rdEndDate),
@@ -83,14 +100,14 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                     TimeNightshifthrs = null,
                                     TimeSundayhrs = DateTime.Now.DayOfWeek.ToString() == "Sunday" ? Convert.ToDecimal(rdEndDate) : null,
                                     TimeStage = String.Empty,
-                                    TimeSiteid = Convert.ToInt32(fileUploadRequest.SiteId),
+                                    TimeSiteid = Convert.ToInt32(fileUploadRequest?.SiteId),
                                     TimePrechargesheetid = null,
                                     TimeBreaktimehrs = null, // how to calculate
                                     TimeNormalhrstotal = null,
                                     TimeNormalhrstotalCid = null,
                                     TimeOvertimehrstotal = null,
                                     TimeOvertimehrstotalCid = null,
-                                    TimePosition = null,
+                                    TimePosition = jobPosition?.ProdProductId,
                                     TimeShift = shift == 6 ? "NormalShift" : "NightShift",
                                     TimeStarttime = shift.ToString(),
                                     TimeEndtime = shift == 6 ? "2pm" : "8pm",
@@ -106,9 +123,9 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                     TimeStartdatesearch = null,
                                     TimeEnddatesearch = null,
                                     TimeSource = "Import", //CRM, Payrun
-                                    TimeBatchNo = 1, // how to get this
+                                    TimeBatchNo = batchNo, // how to get this
                                     TimeCalculatedhrs = null,
-                                    TimePayrunid = 1, // how to get this
+                                    TimePayrunid = Convert.ToInt32(employee?.EmplPayrun), // how to get this
                                     TimeWeek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
                                     TimeTimesheetrunid = 1,// how to get this
                                     TimeInvoiceid = null,

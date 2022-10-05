@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TimesheetImport.TimesheetModels
+﻿namespace TimesheetImport.TimesheetModels
 {
     public class TimesheetSite
     {
