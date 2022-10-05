@@ -24,16 +24,12 @@ namespace TimesheetImport.Infrastructure.Repository
                 var result = await conn.QueryAsync<TimesheetSiteModel>(SqlStatement.GetTimesheetSites).ConfigureAwait(false);
                 return result.ToList();
             }
-        } 
-        
-        public async Task SaveTimesheet(List<Timesheet> timesheets)
+        }
+
+        public async Task SaveTimesheet(List<Timesheet> timesheets, RMSContext rms)
         {
-            using (var ctx = new RMSContext())
-            {
-                //var s = new Timesheet() { Name = "Sim" };
-                ctx.Timesheets.AddRange(timesheets);
-                await ctx.SaveChangesAsync().ConfigureAwait(false);
-            }
+            rms.Timesheets.AddRange(timesheets);
+            await rms.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

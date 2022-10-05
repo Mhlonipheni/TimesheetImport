@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TimesheetImport.Infrastructure.Repository;
 using TimesheetImport.Infrastructure.Repository.ModelMappings;
+using TimesheetImport.Infrastructure.Repository.Models;
 using TimesheetImport.TimesheetModels;
 
 namespace TimesheetImport.Infrastructure
@@ -20,12 +22,23 @@ namespace TimesheetImport.Infrastructure
         }
 
         public async Task ImportToTimesheets(FileUploadRequest fileUploadRequest)
-        {          
-            var timesheests = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest);
+        {
+            try
+            {
+                using (RMSContext rms = new RMSContext())
+                {
+                    var timesheests = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rms);
 
-            await repository.SaveTimesheet(timesheests).ConfigureAwait(false);
+                    await repository.SaveTimesheet(timesheests, rms).ConfigureAwait(false);
 
-            //let's change this to return some errors.
+                    //let's change this to  return some errors.
+                }
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine("Message: " + ex.Message);
+                //whatever we need to do with the error 
+            }
         }
     }
 }

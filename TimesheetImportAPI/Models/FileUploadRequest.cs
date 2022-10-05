@@ -3,7 +3,7 @@
     public class FileUploadRequest
     { 
 
-        public string SiteId { get; set; }
+        public int SiteId { get; set; }
         public IFormCollection? FormCollection { get; set; } 
     }
 }

@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using System.Text;
 using TimesheetImport.Infrastructure;
 using TimesheetImport.Infrastructure.Repository;

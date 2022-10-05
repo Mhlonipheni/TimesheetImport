@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TimesheetImport.TimesheetModels;
+﻿using TimesheetImport.TimesheetModels;
 using TimesheetImportAPI.Models;
 
 namespace TimesheetImportAPI.Mappers
