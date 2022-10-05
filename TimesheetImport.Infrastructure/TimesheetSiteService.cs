@@ -21,23 +21,17 @@ namespace TimesheetImport.Infrastructure
             return TimesheetSiteMapper.MapFromTimesheetSite(result);
         }
 
-        public async Task ImportToTimesheets(FileUploadRequest fileUploadRequest)
+        public async Task<TimesheetImportResult> ImportToTimesheets(FileUploadRequest fileUploadRequest)
         {
-            try
+            using (RMSContext rms = new RMSContext())
             {
-                using (RMSContext rms = new RMSContext())
-                {
-                    var timesheests = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rms);
+                var timesheests = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rms);
 
-                    await repository.SaveTimesheet(timesheests, rms).ConfigureAwait(false);
+                var result = await repository.SaveTimesheet(timesheests, rms).ConfigureAwait(false);
 
-                    //let's change this to  return some errors.
-                }
-            }
-            catch (Exception ex)
-            {
-                //Console.WriteLine("Message: " + ex.Message);
-                //whatever we need to do with the error 
+                return TimesheetSiteMapper.Map(result);
+
+                //let's change this to  return some errors.
             }
         }
     }

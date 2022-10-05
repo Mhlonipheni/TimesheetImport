@@ -155,5 +155,20 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             return timesheets;
         }
 
+        public static TimesheetImportResult Map(TimesheetImportResultModel timesheetImportResult)
+        {
+            return new TimesheetImportResult()
+            {
+                Success = timesheetImportResult.Success,
+                Notifications = new List<Notification>
+                {
+                    new Notification()
+                    {
+                        Message = timesheetImportResult.Errors.FirstOrDefault()
+                    }
+                }
+            };
+        }
+
     }
 }

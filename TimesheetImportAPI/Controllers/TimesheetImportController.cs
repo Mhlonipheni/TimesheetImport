@@ -28,15 +28,21 @@ namespace TimesheetImportAPI.Controllers
         {
             var fileRequest = fileUploadRequest.Map();
 
-            await timesheetSiteService.ImportToTimesheets(fileRequest).ConfigureAwait(false);
+            var result  = await timesheetSiteService.ImportToTimesheets(fileRequest).ConfigureAwait(false);
           
             TimesheetImportResult timesheetImportResult = new TimesheetImportResult()
             {
-                Success = true,
+                Success = result.Success,
                 Notifications = new List<Notification>()
+                {
+                    new Notification()
+                    {
+                        Message = result.Notifications.First().Message ?? null
+                    }
+                }
 
             };
-            return await Task.FromResult(timesheetImportResult).ConfigureAwait(false);
+            return timesheetImportResult;
         }
     }
 }

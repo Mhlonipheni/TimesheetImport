@@ -15,6 +15,7 @@ namespace TimesheetImportAPI.Mappers
                     fileUploadRequest.FormCollection?.Files[0].CopyTo(file);
                     file.Position = 0;                      
                     uploadFile = file;
+                    uploadFile.Position = 0;
                 }
 
                 return new TimesheetImport.TimesheetModels.FileUploadRequest()

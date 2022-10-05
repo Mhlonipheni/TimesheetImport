@@ -12,7 +12,7 @@
             <h4>Available sites</h4>
                 <mat-form-field appearance="fill">
                   <mat-label>Choose a site</mat-label>
-                  <mat-select [formControl]="siteCtrl" #singleSelect required>
+                  <mat-select [formControl]="siteCtrl" #singleSelect>
                     <mat-option>
                       <ngx-mat-select-search [formControl]="siteFilterCtrl"
                       placeholderLabel="Search site ..."
@@ -24,7 +24,7 @@
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
-                <mat-error *ngIf="!siteCtrl.value">
+                <mat-error *ngIf="showError && !siteCtrl.value">
                   Site is a required field.
                 </mat-error>
           </form>

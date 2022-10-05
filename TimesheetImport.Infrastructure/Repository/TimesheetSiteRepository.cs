@@ -26,10 +26,23 @@ namespace TimesheetImport.Infrastructure.Repository
             }
         }
 
-        public async Task SaveTimesheet(List<Timesheet> timesheets, RMSContext rms)
+        public async Task<TimesheetImportResultModel> SaveTimesheet(List<Timesheet> timesheets, RMSContext rms)
         {
             rms.Timesheets.AddRange(timesheets);
-            await rms.SaveChangesAsync().ConfigureAwait(false);
+            var result = await rms.SaveChangesAsync().ConfigureAwait(false);
+            var errorMessage = string.Empty;
+            if (result != timesheets.Count)
+            {
+                errorMessage = "Import Timesheet failed";
+            }
+            return new TimesheetImportResultModel()
+            {
+                Success = result > 0,
+                Errors = new List<string>
+                    {
+                       errorMessage
+                    }
+            };
         }
     }
 }
