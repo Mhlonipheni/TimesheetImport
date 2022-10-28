@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using TimesheetImport.Infrastructure.Repository;
 using TimesheetImport.Infrastructure.Repository.ModelMappings;
@@ -23,10 +22,13 @@ namespace TimesheetImport.Infrastructure
 
         public async Task<TimesheetImportResult> ImportToTimesheets(FileUploadRequest fileUploadRequest)
         {
+            int secterr = -2147483640;
             using (RMSContext rms = new RMSContext())
             {
-                var timesheests = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rms);
-                //
+                //get id and pass it to SaveTimesheeet, 
+                var timesheetRunId = repository.CreateHeader(fileUploadRequest.SiteId, secterr, rms);
+
+                var timesheests = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rms, timesheetRunId);               
 
                 var result = await repository.SaveTimesheet(timesheests, rms).ConfigureAwait(false);
 

@@ -1,8 +1,11 @@
-﻿using Dapper;
+﻿using ConsoleApp5.Models;
+using Dapper;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using TimesheetImport.Infrastructure.Repository.Base;
 using TimesheetImport.Infrastructure.Repository.Models;
@@ -43,6 +46,35 @@ namespace TimesheetImport.Infrastructure.Repository
                        errorMessage
                     }
             };
+        }
+
+        public int CreateHeader(int siteId, int secterr, RMSContext rms)
+        {
+            var timeSheetHeader = CreateHeaderMap(siteId, secterr);
+            rms.TimesheetRuns.Add(timeSheetHeader);
+
+            rms.SaveChanges();
+            return timeSheetHeader.TimhTimesheetRunId;
+        }
+
+        private static TimesheetRun CreateHeaderMap(int siteId, int secterr)
+        {
+            TimesheetRun timeSheetHeader = new TimesheetRun()
+            {
+                TimhCreatedBy = 1,
+                TimhCreatedDate = DateTime.Now,
+                TimhUpdatedBy = 1,
+                TimhUpdatedDate = DateTime.Now,
+                TimhTimeStamp = DateTime.Now,
+                TimhDate = DateTime.Now,
+                TimhSecterr = secterr,
+                TimhSiteid = siteId,
+                TimhStage = "Logged",
+                TimhStatus = "InProgress",
+                TimhUserId = 1,
+                TimhChannelId = 1
+            };
+            return timeSheetHeader;
         }
     }
 }
