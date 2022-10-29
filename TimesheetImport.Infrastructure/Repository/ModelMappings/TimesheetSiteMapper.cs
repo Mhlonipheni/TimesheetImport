@@ -36,7 +36,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             if (lasttimesheet == null || lasttimesheet.TimeBatchNo.HasValue == false)
                 batchNo = 1;
             else
-                batchNo = lasttimesheet.TimeBatchNo.Value + 1;
+                batchNo = lasttimesheet.TimeBatchNo.Value + 1; 
 
             MemoryStream newStr = new MemoryStream(fileUploadRequest.File.ToArray());
 
@@ -60,17 +60,18 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
 
                         int j = 7;
                         double shift = 0;
-                        for (int i = 1; i <= 7; i++)
+                        for (DateTime date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
                         {
-                            Employee employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString()).FirstOrDefault();
+                            //using id number
+                            Employee employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString() || w.EmplName == reader.GetValue(0).ToString()).FirstOrDefault();
                             NewProduct jobPosition = rms.NewProducts.Where(w => w.ProdName == jobName).FirstOrDefault();
                             Site site = rms.Sites.Where(w => w.SiteSiteId == fileUploadRequest.SiteId).FirstOrDefault();
                             Company company = rms.Companies.Where(w => w.CompCompanyId == site.SiteCompanyId).FirstOrDefault();
 
                             shift = reader.GetValue(j - 3)?.ToString() == "12pm" ? 12 : 6;
-                            var sd = startDate.AddHours(shift);
+                            var sd = date.AddHours(shift);
                             var rdEndDate = Convert.ToDouble(reader.GetValue(j));
-                            if (rdEndDate != 0)
+                            if (rdEndDate > 0)
                             {
                                 timesheets.Add(new Timesheet
                                 {
@@ -81,7 +82,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                     TimeTimeStamp = DateTime.Now,
                                     TimeDeleted = null,
                                     TimeSecterr = employee?.EmplSecterr, // NULL,- 2147483640,- 1342177274
-                                    TimeName = reader.GetString(2),
+                                    TimeName = reader.GetString(0),
                                     TimeWorkflowId = null,
                                     TimeStatus = "New",// NULL,Approved,Duplicate,Leave,New,NightShift,Normal,UnApproved
                                     TimeCompanyId = company?.CompCompanyId, // couple of companies in DB
@@ -136,14 +137,11 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                 });
                             }
                             j += 4;
-                            startDate = startDate.AddDays(1);
                         }
-                        startDate = startDate.AddDays(-7);
                     }
                     else
                     {
                         IsNextLineTimesheet = false;
-
                     }
                     string getEndString = reader.GetValue(6)?.ToString()?.ToLower();
                     if (getEndString == "end")
