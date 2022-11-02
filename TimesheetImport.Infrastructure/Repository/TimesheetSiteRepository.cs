@@ -16,6 +16,11 @@ namespace TimesheetImport.Infrastructure.Repository
         {
 
         }
+
+        public string GetConnection()
+        {
+            return Connection.ConnectionString;
+        }
         public async Task<List<TimesheetSiteModel>> GetTimesheetSites()
         {
             using (IDbConnection conn = Connection)
@@ -38,10 +43,15 @@ namespace TimesheetImport.Infrastructure.Repository
             return new TimesheetImportResultModel()
             {
                 Success = result > 0,
-                Errors = new List<string>
+                Notifications = new List<Notification>
+                {
+                    new Notification()
                     {
-                       errorMessage
+                        ErrorMessage = errorMessage,
                     }
+                }
+                     
+                    
             };
         }
     }

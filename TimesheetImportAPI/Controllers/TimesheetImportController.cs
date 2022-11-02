@@ -2,6 +2,7 @@
 using TimesheetImport.Infrastructure;
 using TimesheetImportAPI.Models;
 using TimesheetImportAPI.Mappers;
+using TimesheetImport.Infrastructure.Repository.Models;
 
 namespace TimesheetImportAPI.Controllers
 {
@@ -9,9 +10,11 @@ namespace TimesheetImportAPI.Controllers
     public class TimesheetImportController : Controller
     {
         private readonly ITimesheetSiteService timesheetSiteService;
-        public TimesheetImportController(ITimesheetSiteService timesheetSiteService)
+        private readonly RMSContext rMSContext;
+        public TimesheetImportController(ITimesheetSiteService timesheetSiteService, RMSContext rMSContext)
         {
             this.timesheetSiteService = timesheetSiteService;
+            this.rMSContext = rMSContext;
 
         }
         [HttpGet]
@@ -28,21 +31,9 @@ namespace TimesheetImportAPI.Controllers
         {
             var fileRequest = fileUploadRequest.Map();
 
-            var result  = await timesheetSiteService.ImportToTimesheets(fileRequest).ConfigureAwait(false);
+            var result  = await timesheetSiteService.ImportToTimesheets(fileRequest, rMSContext).ConfigureAwait(false);
           
-            TimesheetImportResult timesheetImportResult = new TimesheetImportResult()
-            {
-                Success = result.Success,
-                Notifications = new List<Notification>()
-                {
-                    new Notification()
-                    {
-                        Message = result.Notifications.First().Message ?? null
-                    }
-                }
-
-            };
-            return timesheetImportResult;
+            return TimesheetSiteMapper.Map(result);
         }
     }
 }

@@ -1,14 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace TimesheetImport.Infrastructure.Repository.Models
 {
     public partial class RMSContext : DbContext
     {
-        public RMSContext()
-        {
-        }
-
-        public RMSContext(DbContextOptions<RMSContext> options)
+       public RMSContext(DbContextOptions<RMSContext> options)
             : base(options)
         {
         }
@@ -19,14 +17,13 @@ namespace TimesheetImport.Infrastructure.Repository.Models
         public virtual DbSet<Site> Sites { get; set; }
         public virtual DbSet<Timesheet> Timesheets { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=197.189.212.178,56431;Database=RMS; user id=karisani; password=CvRmFHIuH74Duxu;");
-            }
-        }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    if (!optionsBuilder.IsConfigured)
+        //    {
+        //        optionsBuilder.UseSqlServer(this.connection);
+        //    }
+        //}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

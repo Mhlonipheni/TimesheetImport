@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using TimesheetImport.Infrastructure.Repository.Models;
 using TimesheetImport.TimesheetModels;
+using Notification = TimesheetImport.Infrastructure.Repository.Models.Notification;
 using Site = TimesheetImport.Infrastructure.Repository.Models.Site;
 
 namespace TimesheetImport.Infrastructure.Repository.ModelMappings
@@ -21,16 +22,16 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             }).ToList();
         }
 
-        public static List<Timesheet> FromFileToTimesheets(FileUploadRequest fileUploadRequest, RMSContext rms)
+        public static Tuple<List<Timesheet>, List<Notification>> FromFileToTimesheets(FileUploadRequest fileUploadRequest, RMSContext rms)
         {
             DateTime startDate = DateTime.Now;
             DateTime endDate = DateTime.Now;
             var jobName = string.Empty;
             var timesheets = new List<Timesheet>();
-
+            var notifications = new List<Notification>();
             int userId = 1;
             var batchNo = 0;
-            int secterr = -2147483640;
+            //int secterr = -2147483640;
             var lasttimesheet = rms.Timesheets.OrderByDescending(o => o.TimeBatchNo).FirstOrDefault();            
 
             if (lasttimesheet == null || lasttimesheet.TimeBatchNo.HasValue == false)
@@ -150,21 +151,20 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                     }
                 }
             }
-            return timesheets;
+            return Tuple.Create(timesheets, notifications);
         }
 
-        public static TimesheetImportResult Map(TimesheetImportResultModel timesheetImportResult)
+        public static TimesheetImportResult Map(TimesheetImportResultModel timesheetImportResult, List<Notification> notifications = null)
         {
+            var errors = new List<TimesheetModels.Notification>();
+            if (notifications != null)
+            {
+                errors.AddRange(notifications.Select(n => new TimesheetModels.Notification() {  LineNumber = n.LineNumber, Message = n.ErrorMessage}));
+            }
             return new TimesheetImportResult()
             {
                 Success = timesheetImportResult.Success,
-                //Notifications = new List<Notification>
-                //{
-                //    new Notification()
-                //    {
-                //        Message = timesheetImportResult.Errors.FirstOrDefault()
-                //    }
-                //}
+                Notifications = errors
             };
         }
 
