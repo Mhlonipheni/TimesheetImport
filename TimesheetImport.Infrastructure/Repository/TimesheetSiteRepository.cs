@@ -17,10 +17,6 @@ namespace TimesheetImport.Infrastructure.Repository
 
         }
 
-        public string GetConnection()
-        {
-            return Connection.ConnectionString;
-        }
         public async Task<List<TimesheetSiteModel>> GetTimesheetSites()
         {
             using (IDbConnection conn = Connection)
