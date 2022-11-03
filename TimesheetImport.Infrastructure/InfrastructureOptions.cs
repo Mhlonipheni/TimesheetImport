@@ -2,6 +2,11 @@
 {
     public class InfrastructureOptions
     {
-        public string DatabaseConnectionString { get; set; }
+        public ConnectionStrings ConnectionStrings { get; set; }
+    }
+
+    public class ConnectionStrings
+    {
+        public string RMSConnectionString { get; set; }
     }
 }

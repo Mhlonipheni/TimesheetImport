@@ -12,7 +12,7 @@ namespace TimesheetImport.Infrastructure.Repository.Base
             this.options = options;
         }
 
-        public IDbConnection Connection => new SqlConnection(options.Value.DatabaseConnectionString);
+        public IDbConnection Connection => new SqlConnection(options.Value.ConnectionStrings.RMSConnectionString);
         
     }
 }
