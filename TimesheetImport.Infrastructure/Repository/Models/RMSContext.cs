@@ -1,29 +1,35 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+﻿using ConsoleApp5.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace TimesheetImport.Infrastructure.Repository.Models
 {
     public partial class RMSContext : DbContext
     {
-       public RMSContext(DbContextOptions<RMSContext> options)
+        public RMSContext()
+        {
+        }
+
+        public RMSContext(DbContextOptions<RMSContext> options)
             : base(options)
         {
         }
 
         public virtual DbSet<Company> Companies { get; set; }
         public virtual DbSet<Employee> Employees { get; set; }
+        public virtual DbSet<HolidaySetItem> HolidaySetItems { get; set; }
         public virtual DbSet<NewProduct> NewProducts { get; set; }
         public virtual DbSet<Site> Sites { get; set; }
         public virtual DbSet<Timesheet> Timesheets { get; set; }
+        public virtual DbSet<TimesheetRun> TimesheetRuns { get; set; }
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    if (!optionsBuilder.IsConfigured)
-        //    {
-        //        optionsBuilder.UseSqlServer(this.connection);
-        //    }
-        //}
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=197.189.212.178,56431;Database=RMS; user id=karisani; password=CvRmFHIuH74Duxu;TrustServerCertificate=True");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -618,6 +624,41 @@ namespace TimesheetImport.Infrastructure.Repository.Models
                     .HasColumnName("empl_wpexpirydate");
             });
 
+            modelBuilder.Entity<HolidaySetItem>(entity =>
+            {
+                entity.HasKey(e => e.HsitCalendarId);
+
+                entity.Property(e => e.HsitCalendarId).HasColumnName("HSIt_CalendarID");
+
+                entity.Property(e => e.HsitCreatedBy).HasColumnName("HSIt_CreatedBy");
+
+                entity.Property(e => e.HsitCreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("HSIt_CreatedDate");
+
+                entity.Property(e => e.HsitDeleted).HasColumnName("HSIt_Deleted");
+
+                entity.Property(e => e.HsitHolidayDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("HSIt_HolidayDate");
+
+                entity.Property(e => e.HsitHolidayName)
+                    .HasMaxLength(40)
+                    .HasColumnName("HSIt_HolidayName");
+
+                entity.Property(e => e.HsitHsetHolidaySetId).HasColumnName("HSIt_HSet_HolidaySetId");
+
+                entity.Property(e => e.HsitTimeStamp)
+                    .HasColumnType("datetime")
+                    .HasColumnName("HSIt_TimeStamp");
+
+                entity.Property(e => e.HsitUpdatedBy).HasColumnName("HSIt_UpdatedBy");
+
+                entity.Property(e => e.HsitUpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("HSIt_UpdatedDate");
+            });
+
             modelBuilder.Entity<NewProduct>(entity =>
             {
                 entity.HasKey(e => e.ProdProductId);
@@ -1044,6 +1085,70 @@ namespace TimesheetImport.Infrastructure.Repository.Models
                     .HasColumnName("time_workedhrs");
 
                 entity.Property(e => e.TimeWorkflowId).HasColumnName("time_WorkflowId");
+            });
+
+            modelBuilder.Entity<TimesheetRun>(entity =>
+            {
+                entity.HasKey(e => e.TimhTimesheetRunId);
+
+                entity.ToTable("TimesheetRun");
+
+                entity.Property(e => e.TimhTimesheetRunId).HasColumnName("timh_TimesheetRunID");
+
+                entity.Property(e => e.TimhChannelId).HasColumnName("timh_ChannelId");
+
+                entity.Property(e => e.TimhCreatedBy).HasColumnName("timh_CreatedBy");
+
+                entity.Property(e => e.TimhCreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("timh_CreatedDate");
+
+                entity.Property(e => e.TimhDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("timh_date");
+
+                entity.Property(e => e.TimhDeleted).HasColumnName("timh_Deleted");
+
+                entity.Property(e => e.TimhName)
+                    .HasMaxLength(30)
+                    .HasColumnName("timh_Name");
+
+                entity.Property(e => e.TimhRosterid).HasColumnName("timh_rosterid");
+
+                entity.Property(e => e.TimhSecterr).HasColumnName("timh_Secterr");
+
+                entity.Property(e => e.TimhShift)
+                    .HasMaxLength(40)
+                    .HasColumnName("timh_shift");
+
+                entity.Property(e => e.TimhSiteid).HasColumnName("timh_siteid");
+
+                entity.Property(e => e.TimhStage)
+                    .HasMaxLength(40)
+                    .HasColumnName("timh_stage");
+
+                entity.Property(e => e.TimhStatus)
+                    .HasMaxLength(40)
+                    .HasColumnName("timh_Status");
+
+                entity.Property(e => e.TimhTimeStamp)
+                    .HasColumnType("datetime")
+                    .HasColumnName("timh_TimeStamp");
+
+                entity.Property(e => e.TimhTimesheetscreated)
+                    .HasMaxLength(1)
+                    .HasColumnName("timh_timesheetscreated")
+                    .IsFixedLength();
+
+                entity.Property(e => e.TimhUpdatedBy).HasColumnName("timh_UpdatedBy");
+
+                entity.Property(e => e.TimhUpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("timh_UpdatedDate");
+
+                entity.Property(e => e.TimhUserId).HasColumnName("timh_UserId");
+
+                entity.Property(e => e.TimhWorkflowId).HasColumnName("timh_WorkflowId");
             });
 
             OnModelCreatingPartial(modelBuilder);

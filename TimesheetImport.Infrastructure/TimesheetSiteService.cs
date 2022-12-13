@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using TimesheetImport.Infrastructure.Repository;
 using TimesheetImport.Infrastructure.Repository.ModelMappings;
@@ -22,20 +20,21 @@ namespace TimesheetImport.Infrastructure
             return TimesheetSiteMapper.MapFromTimesheetSite(result);
         }
 
-        public async Task<TimesheetImportResult> ImportToTimesheets(FileUploadRequest fileUploadRequest, RMSContext rMSContext)
+        public async Task<TimesheetImportResult> ImportToTimesheets(FileUploadRequest fileUploadRequest)
         {
-            using (rMSContext)
+            int secterr = -2147483640;
+            using (RMSContext rms = new RMSContext())
             {
-                var result = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rMSContext);
-                //
-                var saveResult = new TimesheetImportResultModel();
-                if (!result.Item2.Any())
-                {
-                    saveResult = await repository.SaveTimesheet(result.Item1, rMSContext).ConfigureAwait(false);
-                }
+                //get id and pass it to SaveTimesheeet, 
+                var timesheetRunId = repository.CreateHeader(fileUploadRequest.SiteId, secterr, rms);
 
-                return TimesheetSiteMapper.Map(saveResult, result.Item2);
+                var timesheests = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rms, timesheetRunId);               
 
+                var result = await repository.SaveTimesheet(timesheests, rms).ConfigureAwait(false);
+
+                return TimesheetSiteMapper.Map(result);
+
+                //let's change this to  return some errors.
             }
         }
     }

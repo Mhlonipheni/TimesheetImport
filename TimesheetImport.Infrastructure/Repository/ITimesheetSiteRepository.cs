@@ -8,5 +8,6 @@ namespace TimesheetImport.Infrastructure.Repository
     {
         Task<List<TimesheetSiteModel>> GetTimesheetSites();
         Task<TimesheetImportResultModel> SaveTimesheet(List<Timesheet> timesheets, RMSContext rms);
+        int CreateHeader(int siteId, int secterr, RMSContext rms);
     }
 }
