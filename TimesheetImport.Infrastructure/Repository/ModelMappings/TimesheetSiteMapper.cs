@@ -186,13 +186,13 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             return new TimesheetImportResult()
             {
                 Success = timesheetImportResult.Success,
-                Notifications = new List<Notification>
-                {
-                    new Notification()
-                    {
-                        Message = timesheetImportResult.Errors.FirstOrDefault()
-                    }
-                }
+                //Notifications = new List<Notification>
+                //{
+                //    new Notification()
+                //    {
+                //        Message = timesheetImportResult.Errors.FirstOrDefault()
+                //    }
+                //}
             };
         }
     }

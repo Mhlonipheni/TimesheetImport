@@ -78,11 +78,6 @@ export class TimesheetImportComponent implements OnInit {
       this.showError = false;
       this.timesheetService.upload({siteId: this.siteCtrl.value.siteId, File: file}).subscribe(result =>
       {
-        if(result.type == HttpEventType.UploadProgress)
-        {
-
-        }
-
         if(result.type == HttpEventType.Response)
         {
           this.fileUploadInProgress = false;
