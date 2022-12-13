@@ -64,15 +64,16 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "TimesheetImportApp:build:production"
+              "browserTarget": "TimesheetImportApp:build:production",
+              "proxyConfig": "src/proxy.conf.prod.js"
             },
             "development": {
               "browserTarget": "TimesheetImportApp:build:development"
             }
           },
-          "defaultConfiguration": "development",
+          "defaultConfiguration": "production",
           "options": {
-            "proxyConfig": "src/proxy.conf.js"
+            "proxyConfig": "src/proxy.conf.prod.js"
           }
         },
         "extract-i18n": {
