@@ -80,12 +80,15 @@ export class TimesheetImportComponent implements OnInit {
       {
         if(result.type == HttpEventType.Response)
         {
+          console.log(result.body);
           this.fileUploadInProgress = false;
           this.fileUploadControl.clear();
           this.fileUploadControl.enable(true);
           this.toastrService.success("Timesheet imported successfully", "Timesheet Import", {positionClass:'toast-top-right'});
         }
         
+      }, error => {
+        console.log(error);
       });
     }
     else
