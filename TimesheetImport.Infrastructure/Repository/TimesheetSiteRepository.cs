@@ -32,16 +32,22 @@ namespace TimesheetImport.Infrastructure.Repository
 
         public async Task<TimesheetImportResultModel> SaveTimesheet(List<Timesheet> timesheets, RMSContext rms)
         {
-            rms.Timesheets.AddRange(timesheets);
-            var result = await rms.SaveChangesAsync().ConfigureAwait(false);
+            bool successful = true;
             var errorMessage = string.Empty;
-            if (result != timesheets.Count)
+            try
             {
-                errorMessage = "Import Timesheet failed";
+                rms.Timesheets.AddRange(timesheets);
+                var result = await rms.SaveChangesAsync().ConfigureAwait(false);        
+            }
+            catch (Exception ex)
+            {
+                successful = false;
+                errorMessage = ex.Message;
+
             }
             return new TimesheetImportResultModel()
             {
-                Success = result > 0,
+                Success = successful,
                 Notifications = new List<Notification>
                 {
                     new Notification()
@@ -49,9 +55,7 @@ namespace TimesheetImport.Infrastructure.Repository
                         ErrorMessage = errorMessage,
                     }
                 }
-                     
-                    
-            };
+             };
         }
 
         public int CreateHeader(int siteId, int secterr, RMSContext rms)

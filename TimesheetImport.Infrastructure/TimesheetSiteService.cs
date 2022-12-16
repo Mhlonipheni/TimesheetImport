@@ -37,8 +37,6 @@ namespace TimesheetImport.Infrastructure
                 }
 
                 return TimesheetSiteMapper.Map(saveResult, result.Item2);
-
-                //let's change this to  return some errors.
             }
         }
     }
