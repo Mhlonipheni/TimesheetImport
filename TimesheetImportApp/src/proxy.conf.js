@@ -1,10 +1,10 @@
 const PROXY_CONFIG = [
   {
     context: [
-      "/TimesheetImportAPI/api/timesheetimport",
+      "/api/timesheetimport",
       "/api/weatherforecast"
     ],
-    target: "http://localhost/TimesheetImportAPI/",
+    target: "https://localhost:5001",
     secure: false
   }
 ]
