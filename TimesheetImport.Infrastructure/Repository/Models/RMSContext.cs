@@ -18,6 +18,7 @@ namespace TimesheetImport.Infrastructure.Repository.Models
         public virtual DbSet<Employee> Employees { get; set; }
         public virtual DbSet<HolidaySetItem> HolidaySetItems { get; set; }
         public virtual DbSet<NewProduct> NewProducts { get; set; }
+        public virtual DbSet<Rate> Rates { get; set; }
         public virtual DbSet<Site> Sites { get; set; }
         public virtual DbSet<Timesheet> Timesheets { get; set; }
         public virtual DbSet<TimesheetRun> TimesheetRuns { get; set; }
@@ -722,6 +723,183 @@ namespace TimesheetImport.Infrastructure.Repository.Models
                 entity.Property(e => e.ProdUpdatedDate)
                     .HasColumnType("datetime")
                     .HasColumnName("Prod_UpdatedDate");
+            });
+
+            modelBuilder.Entity<Rate>(entity =>
+            {
+                entity.HasKey(e => e.RateRateId);
+
+                entity.ToTable("Rate");
+
+                entity.HasIndex(e => new { e.RateDeleted, e.RateUpdatedDate }, "IDX_Rate_rate_Deleted_rate_UpdatedDate");
+
+                entity.HasIndex(e => new { e.RateDeleted, e.RatePosition }, "IDX_Rate_rate_Deleted_rate_position");
+
+                entity.HasIndex(e => new { e.RateDeleted, e.RateSiteid, e.RateType }, "IDX_Rate_rate_Deleted_rate_siteid_rate_type");
+
+                entity.HasIndex(e => new { e.RateSiteid, e.RatePosition, e.RateInvoicingfrequency, e.RateEffectivedate, e.RateRateId, e.RateDeleted }, "_dta_index_Rate_7_684099215__K24_K28_K44_K25_K1_K7");
+
+                entity.HasIndex(e => e.RateEffectivedate, "_dta_index_Rate_7_684099215__K25_1_7_24_28_44");
+
+                entity.HasIndex(e => new { e.RateInvoicingfrequency, e.RateEffectivedate, e.RateInvoicinggrouping, e.RateRateId, e.RatePosition, e.RateSiteid, e.RateDeleted }, "_dta_index_Rate_7_684099215__K44_K25_K45_K1_K28_K24_K7");
+
+                entity.Property(e => e.RateRateId).HasColumnName("rate_RateID");
+
+                entity.Property(e => e.RateApplynightshift)
+                    .HasMaxLength(40)
+                    .HasColumnName("rate_applynightshift");
+
+                entity.Property(e => e.RateCompanyId).HasColumnName("rate_CompanyId");
+
+                entity.Property(e => e.RateCreatedBy).HasColumnName("rate_CreatedBy");
+
+                entity.Property(e => e.RateCreatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("rate_CreatedDate");
+
+                entity.Property(e => e.RateDeleted).HasColumnName("rate_Deleted");
+
+                entity.Property(e => e.RateEffectivedate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("rate_effectivedate");
+
+                entity.Property(e => e.RateEmployeeid).HasColumnName("rate_employeeid");
+
+                entity.Property(e => e.RateEnddate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("rate_enddate");
+
+                entity.Property(e => e.RateFixedrate)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_fixedrate");
+
+                entity.Property(e => e.RateFixedrateCid).HasColumnName("rate_fixedrate_CID");
+
+                entity.Property(e => e.RateFullshiftvalue)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_fullshiftvalue");
+
+                entity.Property(e => e.RateFullshiftvalueCid).HasColumnName("rate_fullshiftvalue_CID");
+
+                entity.Property(e => e.RateInvoicingfrequency)
+                    .HasMaxLength(40)
+                    .HasColumnName("rate_invoicingfrequency");
+
+                entity.Property(e => e.RateInvoicinggrouping)
+                    .HasMaxLength(40)
+                    .HasColumnName("rate_invoicinggrouping");
+
+                entity.Property(e => e.RateLinkedtohrsworked)
+                    .HasMaxLength(40)
+                    .HasColumnName("rate_linkedtohrsworked");
+
+                entity.Property(e => e.RateManagementfee)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_managementfee");
+
+                entity.Property(e => e.RateManagementfeeCid).HasColumnName("rate_managementfee_CID");
+
+                entity.Property(e => e.RateName)
+                    .HasMaxLength(30)
+                    .HasColumnName("rate_Name");
+
+                entity.Property(e => e.RateNightshift)
+                    .HasMaxLength(40)
+                    .HasColumnName("rate_nightshift");
+
+                entity.Property(e => e.RateNightshiftrate)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_nightshiftrate");
+
+                entity.Property(e => e.RateNightshiftrateCid).HasColumnName("rate_nightshiftrate_CID");
+
+                entity.Property(e => e.RateNightshiftrateperc)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_nightshiftrateperc");
+
+                entity.Property(e => e.RateNormalrate)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_normalrate");
+
+                entity.Property(e => e.RateNormalrateCid).HasColumnName("rate_normalrate_CID");
+
+                entity.Property(e => e.RateNormalrateperc)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_normalrateperc");
+
+                entity.Property(e => e.RateOvertimerate)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_overtimerate");
+
+                entity.Property(e => e.RateOvertimerateCid).HasColumnName("rate_overtimerate_CID");
+
+                entity.Property(e => e.RateOvertimerateperc)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_overtimerateperc");
+
+                entity.Property(e => e.RatePayovertime)
+                    .HasMaxLength(40)
+                    .HasColumnName("rate_payovertime");
+
+                entity.Property(e => e.RatePayrate)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_payrate");
+
+                entity.Property(e => e.RatePayrateCid).HasColumnName("rate_payrate_CID");
+
+                entity.Property(e => e.RatePosition).HasColumnName("rate_position");
+
+                entity.Property(e => e.RateProforma)
+                    .HasMaxLength(40)
+                    .HasColumnName("rate_proforma");
+
+                entity.Property(e => e.RatePublicholidatereateperc)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_publicholidatereateperc");
+
+                entity.Property(e => e.RatePublicholidayrate)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_publicholidayrate");
+
+                entity.Property(e => e.RatePublicholidayrateCid).HasColumnName("rate_publicholidayrate_CID");
+
+                entity.Property(e => e.RateSecterr).HasColumnName("rate_Secterr");
+
+                entity.Property(e => e.RateShift)
+                    .HasMaxLength(40)
+                    .HasColumnName("rate_shift");
+
+                entity.Property(e => e.RateSiteid).HasColumnName("rate_siteid");
+
+                entity.Property(e => e.RateStatus)
+                    .HasMaxLength(40)
+                    .HasColumnName("rate_Status");
+
+                entity.Property(e => e.RateSundayrate)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_sundayrate");
+
+                entity.Property(e => e.RateSundayrateCid).HasColumnName("rate_sundayrate_CID");
+
+                entity.Property(e => e.RateSundayrateperc)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_sundayrateperc");
+
+                entity.Property(e => e.RateTimeStamp)
+                    .HasColumnType("datetime")
+                    .HasColumnName("rate_TimeStamp");
+
+                entity.Property(e => e.RateType)
+                    .HasMaxLength(40)
+                    .HasColumnName("rate_type");
+
+                entity.Property(e => e.RateUpdatedBy).HasColumnName("rate_UpdatedBy");
+
+                entity.Property(e => e.RateUpdatedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("rate_UpdatedDate");
+
+                entity.Property(e => e.RateWorkflowId).HasColumnName("rate_WorkflowId");
             });
 
             modelBuilder.Entity<Site>(entity =>
