@@ -77,6 +77,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                 var dataTable = result.Tables[0];
 
                                 int j = 4;
+                                int i = 7;
                                 double shift = 0;
                                 for (DateTime date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
                                 {
@@ -111,7 +112,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         Tuple<double, double> hours = CalculateHours(sd, ed, nightShiftStart, nightShiftEnd);
                                         var tNormalHours = hours.Item1;
                                         var tNightHours = hours.Item2;
-                                        var workedHrs = tNormalHours + tNightHours;
+                                        var workedHrs = Convert.ToDecimal(reader.GetValue(i));
                                         var timesheet = new Timesheet
                                         {
                                             TimeCreatedBy = userId, //1,31,35,36,43,44,53 we need to know what this maps to.
@@ -159,7 +160,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimePositionsearch = null,
                                             TimeIncludedweekrun = string.Empty,
                                             TimeInvoiced = string.Empty,
-                                            TimeWorkedhrs = Convert.ToDecimal(workedHrs), // normal worked hours.
+                                            TimeWorkedhrs = workedHrs, // normal worked hours.
                                             TimeStartdatesearch = null,
                                             TimeEnddatesearch = null,
                                             TimeSource = "Import", //CRM, Payrun
@@ -189,6 +190,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         }
                                     }
                                         j += 4;
+                                        i += 4;
                                     
                                 }
                             }
@@ -253,13 +255,13 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
 
             while (current < end)
             {
-                if (current.Hour > 6 && current.Hour < 18)
+                if (current.Hour > nightShiftEnd && current.Hour < nightShiftStart)
                 {                   
-                    normalHours += (current.Hour == 18) ? current.Minute / 60.0 : 1;
+                    normalHours += (current.Hour == nightShiftStart) ? current.Minute / 60.0 : 1;
                 }
                 else
                 {
-                    nightHours += (current.Hour == 6) ? current.Minute / 60.0 : 1;
+                    nightHours += (current.Hour == nightShiftEnd) ? current.Minute / 60.0 : 1;
                 }
                 current = current.AddHours(1);
             }
