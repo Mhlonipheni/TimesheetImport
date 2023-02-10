@@ -1,5 +1,4 @@
-﻿using ConsoleApp5.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace TimesheetImport.Infrastructure.Repository.Models
 {
@@ -25,6 +24,11 @@ namespace TimesheetImport.Infrastructure.Repository.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=156.38.132.242;Database=RMSTEST; user id=karisani; password=CvRmFHIuH74Duxu;TrustServerCertificate=True");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -667,6 +671,11 @@ namespace TimesheetImport.Infrastructure.Repository.Models
                     .HasMaxLength(40)
                     .HasColumnName("prod_Active");
 
+                entity.Property(e => e.ProdBonus)
+                    .HasMaxLength(1)
+                    .HasColumnName("prod_bonus")
+                    .IsFixedLength();
+
                 entity.Property(e => e.ProdCode)
                     .HasMaxLength(20)
                     .HasColumnName("prod_code");
@@ -827,6 +836,10 @@ namespace TimesheetImport.Infrastructure.Repository.Models
                     .HasColumnType("numeric(24, 6)")
                     .HasColumnName("rate_normalrateperc");
 
+                entity.Property(e => e.RateNsbceashiftend).HasColumnName("rate_nsbceashiftend");
+
+                entity.Property(e => e.RateNsbceashiftstart).HasColumnName("rate_nsbceashiftstart");
+
                 entity.Property(e => e.RateOvertimerate)
                     .HasColumnType("numeric(24, 6)")
                     .HasColumnName("rate_overtimerate");
@@ -846,6 +859,12 @@ namespace TimesheetImport.Infrastructure.Repository.Models
                     .HasColumnName("rate_payrate");
 
                 entity.Property(e => e.RatePayrateCid).HasColumnName("rate_payrate_CID");
+
+                entity.Property(e => e.RatePensalary)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("rate_pensalary");
+
+                entity.Property(e => e.RatePensalaryCid).HasColumnName("rate_pensalary_CID");
 
                 entity.Property(e => e.RatePosition).HasColumnName("rate_position");
 
@@ -970,6 +989,14 @@ namespace TimesheetImport.Infrastructure.Repository.Models
 
                 entity.Property(e => e.SiteNendtime).HasColumnName("site_nendtime");
 
+                entity.Property(e => e.SiteNsbceashiftend).HasColumnName("site_nsbceashiftend");
+
+                entity.Property(e => e.SiteNsbceashiftstart).HasColumnName("site_nsbceashiftstart");
+
+                entity.Property(e => e.SiteNsbceatype)
+                    .HasMaxLength(40)
+                    .HasColumnName("site_nsbceatype");
+
                 entity.Property(e => e.SiteNsfs)
                     .HasMaxLength(40)
                     .HasColumnName("site_nsfs");
@@ -1015,6 +1042,10 @@ namespace TimesheetImport.Infrastructure.Repository.Models
                 entity.Property(e => e.SiteShift)
                     .HasMaxLength(40)
                     .HasColumnName("site_shift");
+
+                entity.Property(e => e.SiteShiftcalculation)
+                    .HasMaxLength(40)
+                    .HasColumnName("site_shiftcalculation");
 
                 entity.Property(e => e.SiteShifthours)
                     .HasColumnType("numeric(24, 6)")
@@ -1120,6 +1151,10 @@ namespace TimesheetImport.Infrastructure.Repository.Models
                     .HasColumnName("time_endtime")
                     .IsFixedLength();
 
+                entity.Property(e => e.TimeFridayhrs)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("time_fridayhrs");
+
                 entity.Property(e => e.TimeIncludedweekrun)
                     .HasMaxLength(1)
                     .HasColumnName("time_includedweekrun")
@@ -1135,6 +1170,10 @@ namespace TimesheetImport.Infrastructure.Repository.Models
                 entity.Property(e => e.TimeInvoicerunid).HasColumnName("time_invoicerunid");
 
                 entity.Property(e => e.TimeLeadId).HasColumnName("time_LeadId");
+
+                entity.Property(e => e.TimeMondayhrs)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("time_mondayhrs");
 
                 entity.Property(e => e.TimeName)
                     .HasMaxLength(30)
@@ -1202,6 +1241,10 @@ namespace TimesheetImport.Infrastructure.Repository.Models
 
                 entity.Property(e => e.TimeQuoteId).HasColumnName("time_QuoteId");
 
+                entity.Property(e => e.TimeSaturdayhrs)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("time_saturdayhrs");
+
                 entity.Property(e => e.TimeSecterr).HasColumnName("time_Secterr");
 
                 entity.Property(e => e.TimeShift)
@@ -1239,17 +1282,29 @@ namespace TimesheetImport.Infrastructure.Repository.Models
                     .HasColumnType("numeric(24, 6)")
                     .HasColumnName("time_sundayhrs");
 
+                entity.Property(e => e.TimeThursdayhrs)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("time_thursdayhrs");
+
                 entity.Property(e => e.TimeTimeStamp)
                     .HasColumnType("datetime")
                     .HasColumnName("time_TimeStamp");
 
                 entity.Property(e => e.TimeTimesheetrunid).HasColumnName("time_timesheetrunid");
 
+                entity.Property(e => e.TimeTuesdayhrs)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("time_tuesdayhrs");
+
                 entity.Property(e => e.TimeUpdatedBy).HasColumnName("time_UpdatedBy");
 
                 entity.Property(e => e.TimeUpdatedDate)
                     .HasColumnType("datetime")
                     .HasColumnName("time_UpdatedDate");
+
+                entity.Property(e => e.TimeWednesdayhrs)
+                    .HasColumnType("numeric(24, 6)")
+                    .HasColumnName("time_wednesdayhrs");
 
                 entity.Property(e => e.TimeWeek).HasColumnName("time_week");
 

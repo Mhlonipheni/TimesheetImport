@@ -1,6 +1,5 @@
 ﻿using ExcelDataReader;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -37,6 +36,8 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             int timeBreaktimehrs = 1;
             Decimal timePhhrs = 0;
             Decimal timeSundayhrs = 0;
+            var nightShiftStart = 0.0;
+            var nightShiftEnd = 0.0;
             var notifications = new List<Notification>();
             try
             {
@@ -75,95 +76,43 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                 // Now you can get data from each sheet by its index or its "name"
                                 var dataTable = result.Tables[0];
 
-                                int j = 7;
+                                int j = 4;
                                 double shift = 0;
                                 for (DateTime date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
                                 {
-                                    //using id number
+                                    //Read CRM inputs
                                     Employee employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString() || w.EmplName == reader.GetValue(0).ToString()).FirstOrDefault();
                                     NewProduct jobPosition = rms.NewProducts.Where(w => w.ProdName == jobName).FirstOrDefault();
                                     Site site = rms.Sites.Where(w => w.SiteSiteId == fileUploadRequest.SiteId).FirstOrDefault();
-                                    Rate rate = rms.Rates.Where(w => w.RateSiteid == fileUploadRequest.SiteId && w.RateEmployeeid == employee.EmplEmployeeId).FirstOrDefault();
-                                    //Company company = rms.Companies.Where(w => w.CompCompanyId == site.SiteCompanyId).FirstOrDefault();
+                                    Rate rate = rms.Rates.Where(w => w.RateSiteid == fileUploadRequest.SiteId).FirstOrDefault();
                                     int holidayCount = rms.HolidaySetItems.Where(w => w.HsitHsetHolidaySetId == site.SitePhset && w.HsitCreatedDate.Value.Date == startDate.Date).Count();
 
-                                    //shift = reader.GetValue(j - 3)?.ToString() == "12pm" ? 12 : 6;
-
-
-                                    var ratesConfigStartNightShift = site.SiteNstarttime.Value;
-                                    var ratesConfigEndNightShift = site.SiteNendtime.Value;
+                                    //Read Excel inputs
                                     string pattern = @"(\d+)(\D+)";
-                                    Match match = Regex.Match(reader.GetValue(j - 3)?.ToString(), pattern);
-                                    shift = Convert.ToDouble(match.Groups[1].Value);
-                                    string stringPart = match.Groups[2].Value;
-
-
-
-
-
-                                    var sd = date.AddHours(shift);
-                                    var ed = sd.AddHours(8);
-                                    var normalHrs = Convert.ToDecimal(reader.GetValue(j));
-
-                                    if (site.SiteCity == "Site")
+                                    if (!string.IsNullOrEmpty(reader.GetString(j)))
                                     {
-                                        var siteConfigStartNightShift = site.SiteNstarttime.Value;
-                                        var siteConfigEndNightShift = site.SiteNendtime.Value;
+                                        Match match = Regex.Match(reader.GetString(j)?.ToString(), pattern);
+                                        shift = Convert.ToDouble(match.Groups[1].Value);
+                                        var startTime = reader.GetDateTime(j + 1).TimeOfDay;
+                                        var endTime = reader.GetDateTime(j + 2).TimeOfDay;
 
-                                        TimeSpan tsStartTest = TimeSpan.Parse("4");
-                                        TimeSpan tsStart = TimeSpan.Parse("04:00");
-                                        TimeSpan tsEnd = TimeSpan.Parse("13:00");
+                                        var sd = date.Add(startTime);
+                                        var ed = date.Add(endTime);
 
-                                        TimeSpan normalShiftStart = TimeSpan.Parse("06:00");
-                                        TimeSpan normalShiftEnd = TimeSpan.Parse("18:00");
-                                        TimeSpan nightShiftStart = TimeSpan.Parse("18:00");
-                                        TimeSpan nightShiftEnd = TimeSpan.Parse("06:00");
+                                        //Calc fields
+                                        nightShiftStart = (site.SiteNsbceatype == null || site.SiteNsbceatype.ToLower() == "site") ?
+                                                           site.SiteNsbceashiftstart != null ? site.SiteNsbceashiftstart.Value : 18 : rate.RateNsbceashiftstart != null ? rate.RateNsbceashiftstart.Value : 18;
 
-                                        TimeSpan normalHours = CalculateNormalHours(tsStart, tsEnd, normalShiftStart, normalShiftEnd);
-                                        TimeSpan overtimeHours = CalculateOvertimeHours(tsStart, tsEnd, normalShiftStart, normalShiftEnd, nightShiftStart, nightShiftEnd);
+                                        nightShiftEnd = (site.SiteNsbceatype == null || site.SiteNsbceatype.ToLower() == "site") && (site.SiteNsbceashiftend != null) ?
+                                                         site.SiteNsbceashiftend != null ? site.SiteNsbceashiftend.Value : 6 : rate.RateNsbceashiftend != null ? rate.RateNsbceashiftend.Value : 6;
 
-                                        Console.WriteLine("Normal hours worked: " + normalHours.TotalHours);
-                                        Console.WriteLine("Overtime hours worked: " + overtimeHours.TotalHours);
+                                        var IsNormalShift = shift > nightShiftEnd && shift < nightShiftStart;
 
-                                        Console.ReadLine();
-
-                                        //if (date.Hour >= 18 || ed.Hour < 6)
-                                        //{
-                                        //    nightShiftHours += (end - start).TotalHours;
-                                        //}
-                                        //else
-                                        //{
-                                        //    dayShiftHours += (end - start).TotalHours;
-                                        //}
-                                    }
-
-                                    if (shift == 6)
-                                    {
-                                        if (holidayCount > 0)
-                                        {
-                                            timePhhrs = normalHrs - timeBreaktimehrs;
-                                        }
-                                        if (date.DayOfWeek == DayOfWeek.Sunday)
-                                        {
-                                            timeSundayhrs = normalHrs - timeBreaktimehrs;
-                                        }
-
-                                    }
-                                    else if (shift == 12)
-                                    {
-                                        if (holidayCount > 0)
-                                        {
-                                            timePhhrs = normalHrs - timeBreaktimehrs;
-                                        }
-                                        if (date.DayOfWeek == DayOfWeek.Sunday)
-                                        {
-                                            timeSundayhrs = normalHrs - timeBreaktimehrs;
-                                        }
-                                    }
-
-                                    if (normalHrs > 0)
-                                    {
-                                        timesheets.Add(new Timesheet
+                                        Tuple<double, double> hours = CalculateHours(sd, ed, nightShiftStart, nightShiftEnd);
+                                        var tNormalHours = hours.Item1;
+                                        var tNightHours = hours.Item2;
+                                        var workedHrs = tNormalHours + tNightHours;
+                                        var timesheet = new Timesheet
                                         {
                                             TimeCreatedBy = userId, //1,31,35,36,43,44,53 we need to know what this maps to.
                                             TimeCreatedDate = DateTime.Now,
@@ -184,11 +133,11 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimeCaseId = null,
                                             TimeEmployeeid = employee?.EmplEmployeeId,//Convert.(reader.GetValue(3)), //come back
                                             TimeStartdate = sd,
-                                            TimeEnddate = sd.AddHours(Convert.ToDouble(normalHrs)),
-                                            TimeNormalhrs = normalHrs,
+                                            TimeEnddate = ed,
+                                            TimeNormalhrs = Convert.ToDecimal(tNormalHours),
                                             TimeOvertimehrs = null, //anything over than 8 hours is overtime??//comment out
-                                            TimePhhrs = timePhhrs,//don't know this
-                                            TimeNightshifthrs = Convert.ToDecimal(normalHrs),
+                                            TimePhhrs = null,//don't know this
+                                            TimeNightshifthrs = Convert.ToDecimal(tNightHours),
                                             TimeSundayhrs = timeSundayhrs,
                                             TimeStage = String.Empty,
                                             TimeSiteid = Convert.ToInt32(fileUploadRequest?.SiteId),
@@ -199,9 +148,9 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimeOvertimehrstotal = null,
                                             TimeOvertimehrstotalCid = null,
                                             TimePosition = jobPosition?.ProdProductId,
-                                            TimeShift = shift == 6 ? "NormalShift" : "NightShift",
-                                            TimeStarttime = shift.ToString(),
-                                            TimeEndtime = shift == 6 ? "2pm" : "8pm",
+                                            TimeShift = IsNormalShift ? "NormalShift" : "NightShift",
+                                            TimeStarttime = startTime.ToString().Replace(":","").Substring(0,4),
+                                            TimeEndtime = endTime.ToString().Replace(":", "").Substring(0, 4),
                                             TimeApproved = null, //Y,N
                                             TimePlaceholder1 = null,
                                             TimeNightshifthrstotal = null,
@@ -210,7 +159,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimePositionsearch = null,
                                             TimeIncludedweekrun = string.Empty,
                                             TimeInvoiced = string.Empty,
-                                            TimeWorkedhrs = Convert.ToDecimal(normalHrs), // normal worked hours.
+                                            TimeWorkedhrs = Convert.ToDecimal(workedHrs), // normal worked hours.
                                             TimeStartdatesearch = null,
                                             TimeEnddatesearch = null,
                                             TimeSource = "Import", //CRM, Payrun
@@ -224,9 +173,23 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimeInvoicerunid = null,
                                             TimeOverride = null, //Y,N
                                             TimeNewweek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) + 1,
-                                        }); ;
+                                        };
+
+                                        var crmTimeSheet = rms.Timesheets.Where(w => w.TimeEmployeeid == timesheet.TimeEmployeeid && w.TimeStartdate == timesheet.TimeStartdate && w.TimeShift == timesheet.TimeShift && w.TimeDeleted == null).FirstOrDefault();
+
+                                        if (crmTimeSheet != null)
+                                        {
+                                            notifications.Add(new Notification() { LineNumber = "", ErrorMessage = "Duplicate record in CRM for Employee: " + employee.EmplName + " for date:" + sd.ToShortDateString() });
+                                            return Tuple.Create(timesheets, notifications);
+                                        }
+
+                                        if (workedHrs > 0)
+                                        {
+                                            timesheets.Add(timesheet);
+                                        }
                                     }
-                                    j += 4;
+                                        j += 4;
+                                    
                                 }
                             }
                             else
@@ -254,7 +217,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             {
                 notifications.Add(new Notification() { LineNumber = "", ErrorMessage = ex.Message });
             }
-            return Tuple.Create(timesheets, notifications); ;
+            return Tuple.Create(timesheets, notifications); 
         }
 
         public static TimesheetImportResult Map(TimesheetImportResultModel timesheetImportResult, List<Notification> model)
@@ -281,42 +244,27 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             };
         }
 
-        private static TimeSpan CalculateNormalHours(TimeSpan start, TimeSpan end, TimeSpan normalStart, TimeSpan normalEnd)
-        {
-            if (start <= normalStart && end <= normalStart)
-                return TimeSpan.Zero;
-            else if (start >= normalEnd && end >= normalEnd)
-                return TimeSpan.Zero;
-            else if (start >= normalStart && end <= normalEnd)
-                return end - start;
-            else if (start <= normalStart && end >= normalEnd)
-                return normalEnd - normalStart;
-            else if (start <= normalStart && end <= normalEnd)
-                return end - normalStart;
-            else
-                return normalEnd - start;
-        }
 
-        private static TimeSpan CalculateOvertimeHours(TimeSpan start, TimeSpan end, TimeSpan normalStart, TimeSpan normalEnd, TimeSpan nightStart, TimeSpan nightEnd)
+        private static Tuple<double, double> CalculateHours(DateTime start, DateTime end, double nightShiftStart, double nightShiftEnd)
         {
-            if (start <= normalStart && end <= normalStart)
-                return end - start;
-            else if (start >= normalEnd && end >= normalEnd)
-                return end - start;
-            else if (start >= normalStart && end <= normalEnd)
-                return TimeSpan.Zero;
-            else if (start <= normalStart && end >= normalEnd)
-                return TimeSpan.Zero;
-            else if (start <= normalStart && end <= normalEnd)
-                return normalEnd - end;
-            else if (start <= nightStart && end <= nightEnd)
-                return TimeSpan.Zero;
-            else if (start >= nightEnd && end >= nightEnd)
-                return TimeSpan.Zero;
-            else if (start >= nightStart && end <= nightEnd)
-                return end - start;
-            else
-                return nightEnd - start + end - normalStart;
+            double normalHours = 0.0;
+            double nightHours = 0.0;
+            DateTime current = start;
+
+            while (current < end)
+            {
+                if (current.Hour > 6 && current.Hour < 18)
+                {                   
+                    normalHours += (current.Hour == 18) ? current.Minute / 60.0 : 1;
+                }
+                else
+                {
+                    nightHours += (current.Hour == 6) ? current.Minute / 60.0 : 1;
+                }
+                current = current.AddHours(1);
+            }
+
+            return Tuple.Create(normalHours, nightHours);
         }
     }
 }

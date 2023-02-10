@@ -1,5 +1,4 @@
-﻿using ConsoleApp5.Models;
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -62,7 +61,7 @@ namespace TimesheetImport.Infrastructure.Repository
             var timeSheetHeader = CreateHeaderMap(siteId, secterr);
             rms.TimesheetRuns.Add(timeSheetHeader);
 
-           // rms.SaveChanges();
+            rms.SaveChanges();
             return timeSheetHeader.TimhTimesheetRunId;
         }
 

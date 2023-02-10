@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace TimesheetImport.Infrastructure.Repository.Models
 {
@@ -54,5 +53,9 @@ namespace TimesheetImport.Infrastructure.Repository.Models
         public DateTime? RateEnddate { get; set; }
         public decimal? RatePayrate { get; set; }
         public int? RatePayrateCid { get; set; }
+        public decimal? RatePensalary { get; set; }
+        public int? RatePensalaryCid { get; set; }
+        public int? RateNsbceashiftstart { get; set; }
+        public int? RateNsbceashiftend { get; set; }
     }
 }
