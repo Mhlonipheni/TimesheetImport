@@ -24,7 +24,7 @@ export class TimesheetImportComponent implements OnInit {
   }
 
   selectedSite!: TimesheetImport.ITimesheetSite;
-
+  notifications: TimesheetImport.INotification[] = [];
 
   public siteCtrl: FormControl = new FormControl();
   public siteFilterCtrl: FormControl = new FormControl();
@@ -68,6 +68,7 @@ export class TimesheetImportComponent implements OnInit {
   public clearFiles(): void {
     this.fileUploadControl.setValue([]);
     this.fileUploadControl.enable(true);
+    this.notifications = [];
   }
 
   public importTimesheet(){
@@ -80,12 +81,22 @@ export class TimesheetImportComponent implements OnInit {
       {
         if(result.type == HttpEventType.Response)
         {
-          this.fileUploadInProgress = false;
-          this.fileUploadControl.clear();
-          this.fileUploadControl.enable(true);
-          this.toastrService.success("Timesheet imported successfully", "Timesheet Import", {positionClass:'toast-top-right'});
+          if (result.body?.success) {
+            this.fileUploadInProgress = false;
+            this.fileUploadControl.clear();
+            this.fileUploadControl.enable(true);
+            this.notifications = [];
+            this.toastrService.success("Timesheet imported successfully", "Timesheet Import", { positionClass: 'toast-top-right' });
+          }
+          else {
+            this.fileUploadInProgress = false;
+            this.fileUploadControl.enable(true);
+            this.notifications = result.body?.notifications ?? [];
+          }
         }
         
+      }, error => {
+        this.toastrService.error("Timesheet import failed", "Timesheet Import", { positionClass: 'toast-top-right' });
       });
     }
     else

@@ -1,23 +1,22 @@
 declare namespace TimesheetImport {
-    interface ITimesheetSite {
-        siteId: string;
-        siteName: string;
+  interface ITimesheetSite {
+    siteId: string;
+    siteName: string;
+  }
 
-    }
+  interface ITimesheetImportResult {
+    success: boolean;
+    notifications: INotification[];
+  }
 
-    interface ITimesheetImportResult {
-        Notifications: INotification[]
-    }
+  interface INotification {
+    lineNumber: string;
+    message: string;
+  }
 
-    interface INotification{
-        lineNumber: string;
-        Message: string;
-    }
-
-    interface FileUploadRequest
-    {
-        siteId: string;
-        File: File;
-    }
+  interface FileUploadRequest {
+    siteId: string;
+    File: File;
+  }
 
 }

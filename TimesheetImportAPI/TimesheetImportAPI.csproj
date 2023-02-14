@@ -16,6 +16,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TimesheetImport.Infrastructure\TimesheetImport.Infrastructure.csproj" />
+	  <ProjectReference Include="..\TimesheetImportApp\TimesheetImportApp.esproj">
+		  <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+	  </ProjectReference>
   </ItemGroup>
 
 </Project>

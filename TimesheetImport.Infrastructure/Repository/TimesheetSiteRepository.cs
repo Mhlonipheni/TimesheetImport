@@ -1,11 +1,9 @@
-﻿using ConsoleApp5.Models;
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Security.Policy;
 using System.Threading.Tasks;
 using TimesheetImport.Infrastructure.Repository.Base;
 using TimesheetImport.Infrastructure.Repository.Models;
@@ -19,6 +17,7 @@ namespace TimesheetImport.Infrastructure.Repository
         {
 
         }
+
         public async Task<List<TimesheetSiteModel>> GetTimesheetSites()
         {
             using (IDbConnection conn = Connection)
@@ -31,21 +30,30 @@ namespace TimesheetImport.Infrastructure.Repository
 
         public async Task<TimesheetImportResultModel> SaveTimesheet(List<Timesheet> timesheets, RMSContext rms)
         {
-            rms.Timesheets.AddRange(timesheets);
-            var result = await rms.SaveChangesAsync().ConfigureAwait(false);
+            bool successful = true;
             var errorMessage = string.Empty;
-            if (result != timesheets.Count)
+            try
             {
-                errorMessage = "Import Timesheet failed";
+                rms.Timesheets.AddRange(timesheets);
+                var result = await rms.SaveChangesAsync().ConfigureAwait(false);        
+            }
+            catch (Exception ex)
+            {
+                successful = false;
+                errorMessage = ex.Message;
+
             }
             return new TimesheetImportResultModel()
             {
-                Success = result > 0,
-                Errors = new List<string>
+                Success = successful,
+                Notifications = new List<Notification>
+                {
+                    new Notification()
                     {
-                       errorMessage
+                        ErrorMessage = errorMessage,
                     }
-            };
+                }
+             };
         }
 
         public int CreateHeader(int siteId, int secterr, RMSContext rms)
