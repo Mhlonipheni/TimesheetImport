@@ -27,15 +27,28 @@ namespace TimesheetImport.Infrastructure
             using (rMSContext)
             {
                 //get id and pass it to SaveTimesheeet, 
-                var timesheetRunId = repository.CreateHeader(fileUploadRequest.SiteId, secterr, rMSContext);
-
-                var result = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rMSContext, timesheetRunId);
+                var result = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rMSContext);
                 var saveResult = new TimesheetImportResultModel();
                 if (!result.Item2.Any())
                 {
                     saveResult = await repository.SaveTimesheet(result.Item1, rMSContext).ConfigureAwait(false);
                 }
 
+                return TimesheetSiteMapper.Map(saveResult, result.Item2);
+            }
+        }
+
+        public async Task<TimesheetImportResult> ConfirmImportToTimesheets(List<TimesheetDetail> timesheetDetails, RMSContext rMSContext)
+        {
+            int secterr = -2147483640;
+            using (rMSContext)
+            {
+                //get id and pass it to SaveTimesheeet, 
+                var siteId = timesheetDetails.First().TimeSiteid.Value;
+                var timesheetRunId = repository.CreateHeader(siteId, secterr, rMSContext);
+
+                var timesheets = TimesheetSiteMapper.MapToTimesheets(timesheetDetails, timesheetRunId);
+                var saveResult = await repository.SaveTimesheet(timesheets, rMSContext).ConfigureAwait(false); 
                 return TimesheetSiteMapper.Map(saveResult, result.Item2);
             }
         }
