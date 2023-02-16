@@ -22,7 +22,6 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                 SiteName = s.site_Name
             }).ToList();
         }
-
         public static Tuple<List<Timesheet>, List<Notification>> FromFileToTimesheets(FileUploadRequest fileUploadRequest, RMSContext rms, int timesheetRunId)
         {
             DateTime startDate = DateTime.Now;
@@ -38,11 +37,11 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             Decimal timeSundayhrs = 0;
             var nightShiftStart = 0.0;
             var nightShiftEnd = 0.0;
+            var tNormalHours = 0.0;
+            var tNightHours = 0.0;
             var notifications = new List<Notification>();
             try
             {
-
-
                 var lasttimesheet = rms.Timesheets.OrderByDescending(o => o.TimeBatchNo).FirstOrDefault();
 
                 if (lasttimesheet == null || lasttimesheet.TimeBatchNo.HasValue == false)
@@ -62,8 +61,6 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                         lineNumber++;
                         try
                         {
-
-
                             if (reader.GetString(1)?.ToLower() == "to")
                             {
                                 startDate = reader.GetDateTime(0);
@@ -92,13 +89,14 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                     string pattern = @"(\d+)(\D+)";
                                     if (!string.IsNullOrEmpty(reader.GetString(j)))
                                     {
+                                        var workedHrs = Convert.ToDouble(reader.GetValue(i));
                                         Match match = Regex.Match(reader.GetString(j)?.ToString(), pattern);
                                         shift = Convert.ToDouble(match.Groups[1].Value);
                                         var startTime = reader.GetDateTime(j + 1).TimeOfDay;
                                         var endTime = reader.GetDateTime(j + 2).TimeOfDay;
 
                                         var sd = date.Add(startTime);
-                                        var ed = date.Add(endTime);
+                                        var ed = sd.AddHours(workedHrs);
 
                                         //Calc fields
                                         nightShiftStart = (site.SiteNsbceatype == null || site.SiteNsbceatype.ToLower() == "site") ?
@@ -110,9 +108,21 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         var IsNormalShift = shift > nightShiftEnd && shift < nightShiftStart;
 
                                         Tuple<double, double> hours = CalculateHours(sd, ed, nightShiftStart, nightShiftEnd);
-                                        var tNormalHours = hours.Item1;
-                                        var tNightHours = hours.Item2;
-                                        var workedHrs = Convert.ToDecimal(reader.GetValue(i));
+
+                                        if (sd.DayOfWeek == DayOfWeek.Sunday)
+                                        {
+                                            timeSundayhrs = Convert.ToDecimal(hours.Item1) + Convert.ToDecimal(hours.Item2);
+                                        }
+                                        else if (holidayCount > 0)
+                                        {
+                                            timePhhrs = Convert.ToDecimal(hours.Item1) + Convert.ToDecimal(hours.Item2);
+                                        }
+                                        else
+                                        {
+                                            tNormalHours = hours.Item1;
+                                            tNightHours = hours.Item2;
+                                        }
+                                                                                
                                         var timesheet = new Timesheet
                                         {
                                             TimeCreatedBy = userId, //1,31,35,36,43,44,53 we need to know what this maps to.
@@ -137,7 +147,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimeEnddate = ed,
                                             TimeNormalhrs = Convert.ToDecimal(tNormalHours),
                                             TimeOvertimehrs = null, //anything over than 8 hours is overtime??//comment out
-                                            TimePhhrs = null,//don't know this
+                                            TimePhhrs = timePhhrs,//don't know this
                                             TimeNightshifthrs = Convert.ToDecimal(tNightHours),
                                             TimeSundayhrs = timeSundayhrs,
                                             TimeStage = String.Empty,
@@ -160,7 +170,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimePositionsearch = null,
                                             TimeIncludedweekrun = string.Empty,
                                             TimeInvoiced = string.Empty,
-                                            TimeWorkedhrs = workedHrs, // normal worked hours.
+                                            TimeWorkedhrs = Convert.ToDecimal(workedHrs), // normal worked hours.
                                             TimeStartdatesearch = null,
                                             TimeEnddatesearch = null,
                                             TimeSource = "Import", //CRM, Payrun
@@ -180,8 +190,8 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
 
                                         if (crmTimeSheet != null)
                                         {
-                                            notifications.Add(new Notification() { LineNumber = "", ErrorMessage = "Duplicate record in CRM for Employee: " + employee.EmplName + " for date:" + sd.ToShortDateString() });
-                                            return Tuple.Create(timesheets, notifications);
+                                            //notifications.Add(new Notification() { LineNumber = "", ErrorMessage = "Duplicate record in CRM for Employee: " + employee.EmplName + " for date:" + sd.ToShortDateString() });
+                                            //return Tuple.Create(timesheets, notifications);
                                         }
 
                                         if (workedHrs > 0)
@@ -190,8 +200,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         }
                                     }
                                         j += 4;
-                                        i += 4;
-                                    
+                                        i += 4;                                    
                                 }
                             }
                             else
@@ -246,16 +255,17 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             };
         }
 
-
         private static Tuple<double, double> CalculateHours(DateTime start, DateTime end, double nightShiftStart, double nightShiftEnd)
         {
             double normalHours = 0.0;
             double nightHours = 0.0;
             DateTime current = start;
 
+            end = end.AddHours(1);
+
             while (current < end)
             {
-                if (current.Hour > nightShiftEnd && current.Hour < nightShiftStart)
+                if (current.Hour >= nightShiftEnd && current.Hour < nightShiftStart)
                 {                   
                     normalHours += (current.Hour == nightShiftStart) ? current.Minute / 60.0 : 1;
                 }
@@ -265,7 +275,8 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                 }
                 current = current.AddHours(1);
             }
-
+            normalHours += (normalHours > 0) ? -1 : 0;
+            nightHours += (normalHours <= 0) ? -1 : 0;
             return Tuple.Create(normalHours, nightHours);
         }
     }
