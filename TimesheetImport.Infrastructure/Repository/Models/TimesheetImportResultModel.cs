@@ -12,6 +12,14 @@ namespace TimesheetImport.Infrastructure.Repository.Models
     {
         public string Id { get; set; }
         public string LineNumber { get; set; }
-        public string ErrorMessage { get; set; }    
+        public string ErrorMessage { get; set; }
+        public Severity Severity { get; set; }
+    }
+
+    public enum Severity
+    {
+        Critical,
+        Warning,
+        Information
     }
 }

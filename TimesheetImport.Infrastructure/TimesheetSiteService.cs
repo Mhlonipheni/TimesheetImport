@@ -28,11 +28,7 @@ namespace TimesheetImport.Infrastructure
             {
                 //get id and pass it to SaveTimesheeet, 
                 var result = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rMSContext);
-                var saveResult = new TimesheetImportResultModel();
-                if (!result.Item2.Any())
-                {
-                    saveResult = await repository.SaveTimesheet(result.Item1, rMSContext).ConfigureAwait(false);
-                }
+                
 
                 return TimesheetSiteMapper.Map(saveResult, result.Item2);
             }
