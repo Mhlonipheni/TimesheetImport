@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TimesheetImport.Infrastructure.Repository;
@@ -23,18 +24,16 @@ namespace TimesheetImport.Infrastructure
 
         public async Task<TimesheetImportResult> ImportToTimesheets(FileUploadRequest fileUploadRequest, RMSContext rMSContext)
         {
-            int secterr = -2147483640;
             using (rMSContext)
             {
                 //get id and pass it to SaveTimesheeet, 
                 var result = TimesheetSiteMapper.FromFileToTimesheets(fileUploadRequest, rMSContext);
-                
 
-                return TimesheetSiteMapper.Map(saveResult, result.Item2);
+                return await Task.FromResult(TimesheetSiteMapper.Map(result.Item1, result.Item2));
             }
         }
 
-        public async Task<TimesheetImportResult> ConfirmImportToTimesheets(List<TimesheetDetail> timesheetDetails, RMSContext rMSContext)
+        public async Task<TimesheetImportConfirmationResult> ConfirmImportToTimesheets(List<TimesheetDetail> timesheetDetails, RMSContext rMSContext)
         {
             int secterr = -2147483640;
             using (rMSContext)
@@ -44,8 +43,18 @@ namespace TimesheetImport.Infrastructure
                 var timesheetRunId = repository.CreateHeader(siteId, secterr, rMSContext);
 
                 var timesheets = TimesheetSiteMapper.MapToTimesheets(timesheetDetails, timesheetRunId);
-                var saveResult = await repository.SaveTimesheet(timesheets, rMSContext).ConfigureAwait(false); 
-                return TimesheetSiteMapper.Map(saveResult, result.Item2);
+                TimesheetImportConfirmationResult result = new TimesheetImportConfirmationResult();
+                try
+                {
+                    var saveResult = await repository.SaveTimesheet(timesheets, rMSContext).ConfigureAwait(false);
+                    result.Success = saveResult.Success;
+                }
+                catch(Exception ex)
+                {
+                    result.Success = false;
+                    result.Notifications.Add(new TimesheetModels.Notification() { Message= ex.Message, Severity = TimesheetModels.Severity.Critical });
+                }
+                return result;
             }
         }
     }

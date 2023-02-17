@@ -3,6 +3,7 @@ using TimesheetImport.Infrastructure;
 using TimesheetImportAPI.Models;
 using TimesheetImportAPI.Mappers;
 using TimesheetImport.Infrastructure.Repository.Models;
+using TimesheetImport.TimesheetModels;
 
 namespace TimesheetImportAPI.Controllers
 {
@@ -27,13 +28,23 @@ namespace TimesheetImportAPI.Controllers
 
         [HttpPost]
         [Produces(typeof(TimesheetImportResult))]
-        public async Task<ActionResult<TimesheetImportResult>> Import([FromForm] FileUploadRequest fileUploadRequest)
+        public async Task<ActionResult<TimesheetImportResult>> Import([FromForm] TimesheetImportAPI.Models.FileUploadRequest fileUploadRequest)
         {
             var fileRequest = fileUploadRequest.Map();
 
             var result  = await timesheetSiteService.ImportToTimesheets(fileRequest, rMSContext).ConfigureAwait(false);
           
-            return TimesheetSiteMapper.Map(result);
+            return result;
+        }
+
+        [HttpPost]
+        [Produces(typeof(TimesheetImportConfirmationResult))]
+        public async Task<ActionResult<TimesheetImportConfirmationResult>> ConfirmImport([FromForm] List<TimesheetDetail> timesheetDetails)
+        {
+
+            var result = await timesheetSiteService.ConfirmImportToTimesheets(timesheetDetails, rMSContext).ConfigureAwait(false);
+
+            return result;
         }
     }
 }

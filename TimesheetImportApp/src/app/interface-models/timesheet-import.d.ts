@@ -5,11 +5,12 @@ declare namespace TimesheetImport {
   }
 
   interface ITimesheetImportResult {
-    success: boolean;
     timesheetDetails: ITimesheetDetail[];
     notifications: INotification[];
-    HasErrors: boolean;
-    HasWarnings: boolean;
+    errors: INotification[];
+    warnings: INotification[];
+    hasErrors: boolean;
+    hasWarnings: boolean;
   }
 
   interface ITimesheetImportConfirmationResult {
@@ -55,6 +56,7 @@ declare namespace TimesheetImport {
     timeWeek?: number;
     timeTimesheetrunid?: number;
     timeNewweek?: number;
+    timePhhrs?: number;
   }
 
 }

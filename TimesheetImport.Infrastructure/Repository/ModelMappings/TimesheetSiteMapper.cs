@@ -242,27 +242,13 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             return Tuple.Create(timesheets, notifications); 
         }
 
-        public static TimesheetImportResult Map(TimesheetImportResultModel timesheetImportResult, List<Notification> model)
+        public static TimesheetImportResult Map(List<TimesheetDetail> timesheets, List<Notification> model)
         {
-            var notifications = new List<TimesheetImport.TimesheetModels.Notification>();
-            if (model != null && model.Any())
-            {
-
-                notifications.AddRange(model.Select(n => new TimesheetModels.Notification()
-                {
-                    LineNumber = n.LineNumber,
-                    Message = n.ErrorMessage
-                }));
-
-                foreach (var notification in model)
-                {
-
-                }
-            }
+            
             return new TimesheetImportResult()
             {
-                Success = timesheetImportResult.Success,
-                Notifications = notifications
+               TimesheetDetails = timesheets,
+                Notifications = model
             };
         }
 

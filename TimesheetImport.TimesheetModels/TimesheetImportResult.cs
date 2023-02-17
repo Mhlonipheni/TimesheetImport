@@ -5,7 +5,6 @@ namespace TimesheetImport.TimesheetModels
 {
     public class TimesheetImportResult
     {
-        public bool Success { get; set; }
         public List<TimesheetDetail> TimesheetDetails { get; set; } = new List<TimesheetDetail>();
         public List<Notification> Notifications { get; set; } = new List<Notification>();
         public List<Notification> Errors => Notifications.Where(n => n.Severity == Severity.Critical).ToList();
