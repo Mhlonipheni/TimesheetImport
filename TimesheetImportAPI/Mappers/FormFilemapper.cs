@@ -2,7 +2,7 @@
 
 namespace TimesheetImportAPI.Mappers
 {
-    public static class FormFilemapper
+    public static class FormFileMapper
     {
         public static TimesheetImport.TimesheetModels.FileUploadRequest? Map(this FileUploadRequest fileUploadRequest)
         {

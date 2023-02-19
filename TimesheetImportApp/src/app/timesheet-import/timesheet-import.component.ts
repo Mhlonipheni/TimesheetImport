@@ -25,7 +25,7 @@ export class TimesheetImportComponent implements OnInit {
 
   selectedSite!: TimesheetImport.ITimesheetSite;
   notifications: TimesheetImport.INotification[] = [];
-
+  timesheetDetails: TimesheetImport.ITimesheetDetail[] = [];
   public siteCtrl: FormControl = new FormControl();
   public siteFilterCtrl: FormControl = new FormControl();
   public filteredSites: ReplaySubject<TimesheetImport.ITimesheetSite[]> = new ReplaySubject(1);
@@ -36,6 +36,7 @@ export class TimesheetImportComponent implements OnInit {
   clearSearchInput: boolean = true;
   fileUploadInProgress: boolean = false;
   showError: boolean = false;
+  canConfirm: boolean = false;
   allowedMediaTypes: string[] = [
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
   ]
@@ -69,6 +70,7 @@ export class TimesheetImportComponent implements OnInit {
     this.fileUploadControl.setValue([]);
     this.fileUploadControl.enable(true);
     this.notifications = [];
+    this.canConfirm = false;
   }
 
   public importTimesheet(){
@@ -77,32 +79,43 @@ export class TimesheetImportComponent implements OnInit {
     {
       this.fileUploadInProgress = true;
       this.showError = false;
-      this.timesheetService.upload({siteId: this.siteCtrl.value.siteId, File: file}).subscribe(result =>
-      {
-        if(result.type == HttpEventType.Response)
-        {
-          if (result.body?.success) {
-            this.fileUploadInProgress = false;
-            this.fileUploadControl.clear();
-            this.fileUploadControl.enable(true);
-            this.notifications = [];
-            this.toastrService.success("Timesheet imported successfully", "Timesheet Import", { positionClass: 'toast-top-right' });
-          }
-          else {
-            this.fileUploadInProgress = false;
-            this.fileUploadControl.enable(true);
-            this.notifications = result.body?.notifications ?? [];
-          }
+      this.timesheetService.upload({siteId: this.siteCtrl.value.siteId, File: file}).subscribe({ 
+        next: (result) => {
+        if(result.type == HttpEventType.Response) {
+          this.timesheetDetails = result.body?.timesheetDetails ?? [];
+          this.notifications = result.body?.notifications ?? [];
+          this.canConfirm = !result.body?.hasErrors ?? true;
+          this.fileUploadInProgress = false;
         }
-        
-      }, error => {
-        this.toastrService.error("Timesheet import failed", "Timesheet Import", { positionClass: 'toast-top-right' });
-      });
+      },
+      error: (e) => {
+        this.toastrService.error(e, "Timesheet Import", { positionClass: 'toast-top-right' });
+      }});
     }
     else
     {
       this.showError = true;
+      this.canConfirm = false;
     }
+  }
+
+  confirmTimesheet(){
+    this.fileUploadInProgress = true;
+    this.timesheetService.confirm(this.timesheetDetails).subscribe({
+      next: (result) =>{
+        this.fileUploadInProgress = false;
+        this.fileUploadControl.clear();
+        this.fileUploadControl.enable(true);
+        this.notifications = [];
+        this.toastrService.success("Timesheet imported successfully", "Timesheet Import", { positionClass: 'toast-top-right' });
+      },
+      error: (e) =>{
+        this.fileUploadInProgress = false;
+        this.fileUploadControl.enable(true);
+        this.toastrService.error(e, "Timesheet Import", { positionClass: 'toast-top-right' });
+      }
+    });
+
   }
 
   protected setInitialValue() {
