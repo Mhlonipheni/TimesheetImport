@@ -131,12 +131,34 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                     int holidayCount = rms.HolidaySetItems.Where(w => w.HsitHsetHolidaySetId == site.SitePhset && w.HsitCreatedDate.Value.Date == startDate.Date).Count();
                                     if (employee == null)
                                     {
-                                        notifications.Add(new Notification() { LineNumber = reader.GetValue(0).ToString(), Message = "Employee could not be found in CRM: " + reader.GetValue(0).ToString(), Severity = Severity.Critical });
+                                        notifications.Add(new Notification() { LineNumber = reader.GetValue(0).ToString(), Message = "Employee could not be found in CRM: " + reader.GetValue(0).ToString(), Severity = Severity.Warning });
                                         break;
                                     }
                                     if (jobPosition == null)
                                     {
-                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Job title could not be found in CRM: " + jobName, Severity = Severity.Critical });
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Job title could not be found in CRM: " + jobName, Severity = Severity.Warning });
+                                        break;
+                                    }
+                                    if (site.SiteStarttime == null)
+                                    {
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Start time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Warning });
+                                        break;
+                                    }
+                                    if (site.SiteEndtime == null)
+                                    {
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "End time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Warning });
+                                        break;
+                                    }
+
+                                    if (site.SiteNsbceashiftstart == null)
+                                    {
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift Start time in CRM is not setup correctly for site: " + site.SiteName, Severity = Severity.Warning });
+                                        break;
+                                    }
+
+                                    if (site.SiteNsbceashiftend == null)
+                                    {
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift End time in CRM is not setup correctly for site: " + site.SiteName, Severity = Severity.Warning });
                                         break;
                                     }
 
@@ -152,9 +174,10 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
 
                                         //Calc fields
                                         nightShiftStart = (site.SiteNsbceatype == null || site.SiteNsbceatype.ToLower() == "site") ?
-                                        site.SiteNsbceashiftstart != null ? site.SiteNsbceashiftstart.Value : 18 : rate.RateNsbceashiftstart != null ? rate.RateNsbceashiftstart.Value : 18;
-                                        nightShiftEnd = (site.SiteNsbceatype == null || site.SiteNsbceatype.ToLower() == "site") && (site.SiteNsbceashiftend != null) ?
-                                        site.SiteNsbceashiftend != null ? site.SiteNsbceashiftend.Value : 6 : rate.RateNsbceashiftend != null ? rate.RateNsbceashiftend.Value : 6;
+                                         site.SiteNsbceashiftstart.Value : rate.RateNsbceashiftstart.Value;
+                                        
+                                        nightShiftEnd = (site.SiteNsbceatype == null || site.SiteNsbceatype.ToLower() == "site") ?
+                                         site.SiteNsbceashiftend.Value : rate.RateNsbceashiftend.Value;
 
                                         var IsNormalShift = shift > nightShiftEnd && shift < nightShiftStart;
                                         var timeShift = IsNormalShift ? "NormalShift" : "NightShift";
@@ -165,7 +188,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
 
                                         if (crmTimeSheet != null)
                                         {
-                                            notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Duplicate record in CRM for Employee: " + employee.EmplName + " for date: " + sd.ToShortDateString(), Severity = Severity.Critical });
+                                            notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Duplicate record in CRM for Employee: " + employee.EmplName + " for date: " + sd.ToShortDateString(), Severity = Severity.Warning });
                                             break;
                                         }
 
