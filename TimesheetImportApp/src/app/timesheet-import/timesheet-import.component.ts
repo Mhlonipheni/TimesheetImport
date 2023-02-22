@@ -25,6 +25,8 @@ export class TimesheetImportComponent implements OnInit {
 
   selectedSite!: TimesheetImport.ITimesheetSite;
   notifications: TimesheetImport.INotification[] = [];
+  errors: TimesheetImport.INotification[] = [];
+  warnings: TimesheetImport.INotification[] = [];
   timesheetDetails: TimesheetImport.ITimesheetDetail[] = [];
   public siteCtrl: FormControl = new FormControl();
   public siteFilterCtrl: FormControl = new FormControl();
@@ -36,7 +38,7 @@ export class TimesheetImportComponent implements OnInit {
   clearSearchInput: boolean = true;
   fileUploadInProgress: boolean = false;
   showError: boolean = false;
-  canConfirm: boolean = false;
+  confirmEnabled: boolean = false;
   allowedMediaTypes: string[] = [
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
   ]
@@ -70,7 +72,7 @@ export class TimesheetImportComponent implements OnInit {
     this.fileUploadControl.setValue([]);
     this.fileUploadControl.enable(true);
     this.notifications = [];
-    this.canConfirm = false;
+    this.confirmEnabled = false;
   }
 
   public importTimesheet(){
@@ -84,7 +86,9 @@ export class TimesheetImportComponent implements OnInit {
         if(result.type == HttpEventType.Response) {
           this.timesheetDetails = result.body?.timesheetDetails ?? [];
           this.notifications = result.body?.notifications ?? [];
-          this.canConfirm = !result.body?.hasErrors ?? true;
+          this.errors = _.filter(this.notifications, n => n.severity == "Critical");
+          this.warnings = _.filter(this.notifications, n => n.severity == "Warning");
+          this.confirmEnabled = !result.body?.hasErrors ?? true;
           this.fileUploadInProgress = false;
         }
       },
@@ -95,7 +99,7 @@ export class TimesheetImportComponent implements OnInit {
     else
     {
       this.showError = true;
-      this.canConfirm = false;
+      this.confirmEnabled = false;
     }
   }
 
@@ -104,10 +108,17 @@ export class TimesheetImportComponent implements OnInit {
     this.timesheetService.confirm(this.timesheetDetails).subscribe({
       next: (result) =>{
         this.fileUploadInProgress = false;
-        this.fileUploadControl.clear();
-        this.fileUploadControl.enable(true);
-        this.notifications = [];
-        this.toastrService.success("Timesheet imported successfully", "Timesheet Import", { positionClass: 'toast-top-right' });
+        if (result.success == true) {
+          this.fileUploadControl.clear();
+          this.fileUploadControl.enable(true);
+          this.notifications = [];
+          this.confirmEnabled = false;
+          this.toastrService.success("Timesheet imported successfully", "Timesheet Import", { positionClass: 'toast-top-right' });
+        }
+        else {
+          this.notifications = result.notifications;
+          this.errors = _.filter(this.notifications, n => n.severity == "Critical");
+        }
       },
       error: (e) =>{
         this.fileUploadInProgress = false;

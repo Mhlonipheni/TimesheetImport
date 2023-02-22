@@ -26,10 +26,8 @@ export class TimesheetImportService {
     return this.http.request(req);
   }
 
-  confirm(timesheetDetails: TimesheetImport.ITimesheetDetail[]): Observable<HttpEvent<TimesheetImport.ITimesheetImportConfirmationResult>> {
-    
-    const req = new HttpRequest('POST', '/api/timesheetimport/ConfirmImport', timesheetDetails);
-    return this.http.request(req);
+  confirm(timesheetDetails: TimesheetImport.ITimesheetDetail[]): Observable<TimesheetImport.ITimesheetImportConfirmationResult> {
+    return this.http.post<TimesheetImport.ITimesheetImportConfirmationResult>('/api/timesheetimport/ConfirmImport', timesheetDetails);
   }
 }
 
