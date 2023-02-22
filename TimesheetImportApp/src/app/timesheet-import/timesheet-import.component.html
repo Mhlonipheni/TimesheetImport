@@ -61,9 +61,9 @@
     <div class="row">
       <div class="col-3"></div>
       <div class="col-md-6">
-        <button type="button" class="btn th-primary has-shadow-hover" (click)="clearFiles()" [disabled]="fileUploadControl.size === 0">Clear Files</button> &nbsp;
-        <button type="button" class="btn th-primary has-shadow-hover" (click)="importTimesheet()" [disabled]="fileUploadControl.size === 0">Import Timesheet</button> &nbsp;
-        <button type="button" class="btn th-primary has-shadow-hover" (click)="confirmTimesheet()" [disabled]="!canConfirm">Confirm</button>
+        <button type="button" class="btn th-primary has-shadow-hover" (click)="clearFiles()" [disabled]="fileUploadControl.disabled === true">Clear Files</button> &nbsp;
+        <button type="button" class="btn th-primary has-shadow-hover" (click)="importTimesheet()" [disabled]="fileUploadControl.disabled === true">Import Timesheet</button> &nbsp;
+        <button type="button" class="btn th-primary has-shadow-hover" (click)="confirmTimesheet()" [disabled]="!confirmEnabled">Confirm</button>
       </div>
       <div class="col-3"></div>
     </div>
@@ -73,11 +73,20 @@
 <div class="row" *ngIf="notifications && notifications.length > 0">
   <div class="col-3"></div>
   <div class="col-md-6">
-    <div class="row" *ngFor="let notification of notifications">
-      <mat-error>
-        <span>Error on line number: {{notification.lineNumber}} </span> &nbsp;
-        <span>{{notification.message}}</span>
-      </mat-error>
+    <div  class="alert alert-danger" role="alert" *ngIf="errors && errors.length > 0">
+      <div class="row" *ngFor="let error of errors">
+        <span>Error on line number: {{error.lineNumber}} </span> &nbsp;
+        <span>{{error.message}}</span>
+      </div>
+    </div>
+    <div class="alert alert-warning" role="alert" *ngIf="warnings && warnings.length > 0">
+      <div class="row warning-message" *ngFor="let waring of warnings">
+        <span>Warning on line number: {{waring.lineNumber}} </span> &nbsp;
+        <span>{{waring.message}}</span>
+      </div>
+    </div>
+    <div class="alert alert-success" role="alert" *ngIf="confirmEnabled">
+      Please click on confirm button to confirm timesheet import.
     </div>
   </div>
   <div class="col-3"></div>
