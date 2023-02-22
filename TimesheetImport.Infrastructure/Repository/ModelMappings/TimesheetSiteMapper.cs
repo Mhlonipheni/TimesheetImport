@@ -1,12 +1,9 @@
 ﻿using ExcelDataReader;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
 using System.Text.RegularExpressions;
 using TimesheetImport.Infrastructure.Repository.Models;
 using TimesheetImport.TimesheetModels;
