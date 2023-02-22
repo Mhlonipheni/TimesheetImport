@@ -75,12 +75,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             var batchNo = 0;
             int secterr = -2147483640;
             int timeBreaktimehrs = 1;
-            Decimal timePhhrs = 0;
-            Decimal timeSundayhrs = 0;
-            var nightShiftStart = 0.0;
-            var nightShiftEnd = 0.0;
-            var tNormalHours = 0.0;
-            var tNightHours = 0.0;
+
             var notifications = new List<Notification>();
             try
             {
@@ -126,36 +121,42 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                     Site site = rms.Sites.Where(w => w.SiteSiteId == fileUploadRequest.SiteId).FirstOrDefault();
                                     Rate rate = rms.Rates.Where(w => w.RateSiteid == fileUploadRequest.SiteId).FirstOrDefault();
                                     int holidayCount = rms.HolidaySetItems.Where(w => w.HsitHsetHolidaySetId == site.SitePhset && w.HsitCreatedDate.Value.Date == startDate.Date).Count();
+                                    Decimal timePhhrs = 0;
+                                    Decimal timeSundayhrs = 0;
+                                    var nightShiftStart = 0.0;
+                                    var nightShiftEnd = 0.0;
+                                    var tNormalHours = 0.0;
+                                    var tNightHours = 0.0;
                                     if (employee == null)
                                     {
-                                        notifications.Add(new Notification() { LineNumber = reader.GetValue(0).ToString(), Message = "Employee could not be found in CRM: " + reader.GetValue(0).ToString(), Severity = Severity.Warning });
+                                        notifications.Add(new Notification() { LineNumber = reader.GetValue(0).ToString(), Message = "Employee could not be found in CRM: " + reader.GetValue(0).ToString(), Severity = Severity.Critical });
                                         break;
                                     }
                                     if (jobPosition == null)
                                     {
-                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Job title could not be found in CRM: " + jobName, Severity = Severity.Warning });
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Job title could not be found in CRM: " + jobName, Severity = Severity.Critical });
                                         break;
                                     }
                                     if (site.SiteStarttime == null)
                                     {
-                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Start time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Warning });
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Start time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Critical });
                                         break;
                                     }
                                     if (site.SiteEndtime == null)
                                     {
-                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "End time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Warning });
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "End time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Critical });
                                         break;
                                     }
 
                                     if (site.SiteNsbceashiftstart == null)
                                     {
-                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift Start time in CRM is not setup correctly for site: " + site.SiteName, Severity = Severity.Warning });
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift Start time in CRM is not setup correctly for site: " + site.SiteName, Severity = Severity.Critical });
                                         break;
                                     }
 
                                     if (site.SiteNsbceashiftend == null)
                                     {
-                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift End time in CRM is not setup correctly for site: " + site.SiteName, Severity = Severity.Warning });
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift End time in CRM is not setup correctly for site: " + site.SiteName, Severity = Severity.Critical });
                                         break;
                                     }
 
@@ -185,7 +186,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
 
                                         if (crmTimeSheet != null)
                                         {
-                                            notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Duplicate record in CRM for Employee: " + employee.EmplName + " for date: " + sd.ToShortDateString(), Severity = Severity.Warning });
+                                            notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Duplicate record in CRM for Employee: " + employee.EmplName + " for date: " + sd.ToShortDateString(), Severity = Severity.Critical });
                                             break;
                                         }
 
@@ -241,9 +242,9 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             timesheets.Add(timesheet);
                                         }
                                     }
+                                    j += 4;
+                                    i += 4;
                                 }
-                                j += 4;
-                                i += 4;
                             }
                             else
                             {

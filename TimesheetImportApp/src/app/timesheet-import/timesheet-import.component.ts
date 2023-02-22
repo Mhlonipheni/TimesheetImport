@@ -86,8 +86,8 @@ export class TimesheetImportComponent implements OnInit {
         if(result.type == HttpEventType.Response) {
           this.timesheetDetails = result.body?.timesheetDetails ?? [];
           this.notifications = result.body?.notifications ?? [];
-          this.errors = _.filter(this.notifications, n => n.severity == "Critical");
-          this.warnings = _.filter(this.notifications, n => n.severity == "Warning");
+          this.errors = _.filter(this.notifications, n => n.severity == 0);
+          this.warnings = _.filter(this.notifications, n => n.severity == 1);
           this.confirmEnabled = !result.body?.hasErrors ?? true;
           this.fileUploadInProgress = false;
         }
@@ -117,7 +117,7 @@ export class TimesheetImportComponent implements OnInit {
         }
         else {
           this.notifications = result.notifications;
-          this.errors = _.filter(this.notifications, n => n.severity == "Critical");
+          this.errors = _.filter(this.notifications, n => n.severity == 0);
         }
       },
       error: (e) =>{
