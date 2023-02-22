@@ -21,7 +21,7 @@ declare namespace TimesheetImport {
   interface INotification {
     lineNumber: string;
     message: string;
-    severity: string;
+    severity: number;
   }
 
   interface FileUploadRequest {
