@@ -39,7 +39,7 @@ namespace TimesheetImportAPI.Controllers
 
         [HttpPost]
         [Produces(typeof(TimesheetImportConfirmationResult))]
-        public async Task<ActionResult<TimesheetImportConfirmationResult>> ConfirmImport([FromForm] List<TimesheetDetail> timesheetDetails)
+        public async Task<ActionResult<TimesheetImportConfirmationResult>> ConfirmImport([FromBody] List<TimesheetDetail> timesheetDetails)
         {
 
             var result = await timesheetSiteService.ConfirmImportToTimesheets(timesheetDetails, rMSContext).ConfigureAwait(false);
