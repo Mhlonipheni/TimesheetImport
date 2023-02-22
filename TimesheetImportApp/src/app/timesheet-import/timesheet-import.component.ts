@@ -123,6 +123,7 @@ export class TimesheetImportComponent implements OnInit {
       error: (e) =>{
         this.fileUploadInProgress = false;
         this.fileUploadControl.enable(true);
+        this.confirmEnabled = false;
         this.toastrService.error(e, "Timesheet Import", { positionClass: 'toast-top-right' });
       }
     });

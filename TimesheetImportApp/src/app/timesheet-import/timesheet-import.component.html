@@ -73,17 +73,20 @@
 <div class="row" *ngIf="notifications && notifications.length > 0">
   <div class="col-3"></div>
   <div class="col-md-6">
-    <div class="row" *ngFor="let error of errors">
-      <mat-error>
+    <div  class="alert alert-danger" role="alert" *ngIf="errors && errors.length > 0">
+      <div class="row" *ngFor="let error of errors">
         <span>Error on line number: {{error.lineNumber}} </span> &nbsp;
         <span>{{error.message}}</span>
-      </mat-error>
+      </div>
     </div>
-    <div class="row" *ngFor="let waring of warnings">
-      <mat-error>
+    <div class="alert alert-warning" role="alert" *ngIf="warnings && warnings.length > 0">
+      <div class="row warning-message" *ngFor="let waring of warnings">
         <span>Warning on line number: {{waring.lineNumber}} </span> &nbsp;
         <span>{{waring.message}}</span>
-      </mat-error>
+      </div>
+    </div>
+    <div class="alert alert-success" role="alert" *ngIf="confirmEnabled">
+      Please click on confirm button to confirm timesheet import.
     </div>
   </div>
   <div class="col-3"></div>
