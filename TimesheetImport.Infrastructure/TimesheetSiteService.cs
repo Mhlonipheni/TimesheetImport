@@ -48,8 +48,10 @@ namespace TimesheetImport.Infrastructure
                 {
                     var saveResult = await repository.SaveTimesheet(timesheets, rMSContext).ConfigureAwait(false);
                     result.Success = saveResult.Success;
+                    result.Notifications.AddRange(saveResult.Notifications.Select(n => new TimesheetModels.Notification() { Message = n.ErrorMessage, Severity = (TimesheetModels.Severity)n.Severity }));
+
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     result.Success = false;
                     result.Notifications.Add(new TimesheetModels.Notification() { Message= ex.Message, Severity = TimesheetModels.Severity.Critical });

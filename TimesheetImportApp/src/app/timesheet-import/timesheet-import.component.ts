@@ -72,6 +72,8 @@ export class TimesheetImportComponent implements OnInit {
     this.fileUploadControl.setValue([]);
     this.fileUploadControl.enable(true);
     this.notifications = [];
+    this.errors = [];
+    this.warnings = [];
     this.confirmEnabled = false;
   }
 

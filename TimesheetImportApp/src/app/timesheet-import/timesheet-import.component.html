@@ -62,7 +62,7 @@
       <div class="col-3"></div>
       <div class="col-md-6">
         <button type="button" class="btn th-primary has-shadow-hover" (click)="clearFiles()" [disabled]="fileUploadControl.size === 0">Clear Files</button> &nbsp;
-        <button type="button" class="btn th-primary has-shadow-hover" (click)="importTimesheet()" [disabled]="fileUploadControl.size === 0">Import Timesheet</button> &nbsp;
+        <button type="button" class="btn th-primary has-shadow-hover" (click)="importTimesheet()" [disabled]="fileUploadControl.size === 0 || confirmEnabled">Import Timesheet</button> &nbsp;
         <button type="button" class="btn th-primary has-shadow-hover" (click)="confirmTimesheet()" [disabled]="!confirmEnabled">Confirm</button>
       </div>
       <div class="col-3"></div>
@@ -70,24 +70,24 @@
   </div>
   <div class="col-md-3"></div>
 </div>
-<div class="row" *ngIf="notifications && notifications.length > 0">
+<div class="row">
   <div class="col-3"></div>
   <div class="col-md-6">
     <div  class="alert alert-danger" role="alert" *ngIf="errors && errors.length > 0">
       <div class="row">
         <ol>
-          <li *ngFor="let error of errors">Error on line number: {{error.lineNumber}} &nbsp; {{error.message}}</li> 
+          <li *ngFor="let error of errors">Error with employee: {{error.lineNumber}} &nbsp; {{error.message}}</li> 
         </ol>
       </div>
     </div>
     <div class="alert alert-warning" role="alert" *ngIf="warnings && warnings.length > 0">
       <div class="row">
         <ol>
-          <li *ngFor="let waring of warnings">Warning on line number: {{waring.lineNumber}} &nbsp; {{waring.message}} </li>
+          <li *ngFor="let waring of warnings">Warning with employee: {{waring.lineNumber}} &nbsp; {{waring.message}} </li>
         </ol>
       </div>
     </div>
-    <div class="alert alert-success" role="alert" *ngIf="confirmEnabled">
+    <div class="alert alert-success" role="alert" *ngIf="confirmEnabled && errors.length == 0">
       Please click on confirm button to confirm timesheet import.
     </div>
   </div>
