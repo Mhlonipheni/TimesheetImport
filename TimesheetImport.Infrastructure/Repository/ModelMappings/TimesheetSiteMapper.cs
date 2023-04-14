@@ -93,6 +93,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                     var result = reader.AsDataSet();
                     bool IsNextLineTimesheet = false;
                     int lineNumber = 0;
+                    Employee employee = null;
                     while (reader.Read())
                     {
                         lineNumber++;
@@ -100,9 +101,9 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                         {
                             if (reader.GetString(1)?.ToLower() == "to")
                             {
-                                startDate = reader.GetDateTime(0);
-                                endDate = reader.GetDateTime(2);
-                                jobName = reader.GetString(3);
+                               DateTime.TryParse(reader.GetValue(0).ToString(), out startDate);
+                               DateTime.TryParse(reader.GetValue(2).ToString(), out endDate);
+                               jobName = reader.GetString(3);
                             }
 
                             if (IsNextLineTimesheet && !string.IsNullOrEmpty(reader.GetString(0)))
@@ -116,7 +117,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                 for (DateTime date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
                                 {
                                     //Read CRM inputs
-                                    Employee employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString() || w.EmplName == reader.GetValue(0).ToString()).FirstOrDefault();
+                                    employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString() || w.EmplName == reader.GetValue(0).ToString()).FirstOrDefault();
                                     NewProduct jobPosition = rms.NewProducts.Where(w => w.ProdName == jobName).FirstOrDefault();
                                     Site site = rms.Sites.Where(w => w.SiteSiteId == fileUploadRequest.SiteId).FirstOrDefault();
                                     Rate rate = rms.Rates.Where(w => w.RateSiteid == fileUploadRequest.SiteId).FirstOrDefault();
@@ -148,15 +149,27 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         break;
                                     }
 
-                                    if (site.SiteNsbceashiftstart == null)
+                                    if (site.SiteNsbceatype.ToLower() == "site" && site.SiteNsbceashiftstart == null)
                                     {
                                         notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift Start time in CRM is not setup correctly for site: " + site.SiteName, Severity = Severity.Critical });
                                         break;
                                     }
 
-                                    if (site.SiteNsbceashiftend == null)
+                                    if (site.SiteNsbceatype.ToLower() == "site" && site.SiteNsbceashiftend == null)
                                     {
                                         notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift End time in CRM is not setup correctly for site: " + site.SiteName, Severity = Severity.Critical });
+                                        break;
+                                    }
+
+                                    if (site.SiteNsbceatype.ToLower() == "rates" && rate.RateNsbceashiftstart == null)
+                                    {
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift Start time in CRM is not setup correctly for rate: " + site.SiteName, Severity = Severity.Critical });
+                                        break;
+                                    }
+
+                                    if (site.SiteNsbceatype.ToLower() == "rates" && rate.RateNsbceashiftend == null)
+                                    {
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift End time in CRM is not setup correctly for rate: " + site.SiteName, Severity = Severity.Critical });
                                         break;
                                     }
 
@@ -260,7 +273,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                         {
                             notifications.Add(new Notification()
                             {
-                                LineNumber = lineNumber.ToString(),
+                                LineNumber = reader.GetValue(0).ToString(),
                                 Message = ex.Message,
                                 Severity = Severity.Critical
                             });
