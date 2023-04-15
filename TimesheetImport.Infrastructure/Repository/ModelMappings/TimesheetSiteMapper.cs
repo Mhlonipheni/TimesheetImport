@@ -93,7 +93,6 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                     var result = reader.AsDataSet();
                     bool IsNextLineTimesheet = false;
                     int lineNumber = 0;
-                    Employee employee = null;
                     while (reader.Read())
                     {
                         lineNumber++;
@@ -117,17 +116,9 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                 for (DateTime date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
                                 {
                                     //Read CRM inputs
-                                    employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString() || w.EmplName == reader.GetValue(0).ToString()).FirstOrDefault();
+                                    Employee employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString() || w.EmplName == reader.GetValue(0).ToString()).FirstOrDefault();
                                     NewProduct jobPosition = rms.NewProducts.Where(w => w.ProdName == jobName).FirstOrDefault();
                                     Site site = rms.Sites.Where(w => w.SiteSiteId == fileUploadRequest.SiteId).FirstOrDefault();
-                                    Rate rate = rms.Rates.Where(w => w.RateSiteid == fileUploadRequest.SiteId && w.RateType == "Company" && w.RateStatus == "Active").OrderByDescending(r => r.RateEffectivedate).FirstOrDefault();
-                                    int holidayCount = rms.HolidaySetItems.Where(w => w.HsitHsetHolidaySetId == site.SitePhset && w.HsitCreatedDate.Value.Date == startDate.Date).Count();
-                                    Decimal timePhhrs = 0;
-                                    Decimal timeSundayhrs = 0;
-                                    var nightShiftStart = 0.0;
-                                    var nightShiftEnd = 0.0;
-                                    var tNormalHours = 0.0;
-                                    var tNightHours = 0.0;
                                     if (employee == null)
                                     {
                                         notifications.Add(new Notification() { LineNumber = reader.GetValue(0).ToString(), Message = "Employee could not be found in CRM: " + reader.GetValue(0).ToString(), Severity = Severity.Critical });
@@ -138,6 +129,15 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Job title could not be found in CRM: " + jobName, Severity = Severity.Critical });
                                         break;
                                     }
+                                    Rate rate = rms.Rates.Where(w => w.RateSiteid == fileUploadRequest.SiteId && w.RateType == "Company" && w.RateStatus == "Active" && w.RatePosition == jobPosition.ProdProductId).OrderByDescending(r => r.RateEffectivedate).FirstOrDefault();
+                                    int holidayCount = rms.HolidaySetItems.Where(w => w.HsitHsetHolidaySetId == site.SitePhset && w.HsitCreatedDate.Value.Date == startDate.Date).Count();
+                                    Decimal timePhhrs = 0;
+                                    Decimal timeSundayhrs = 0;
+                                    var nightShiftStart = 0.0;
+                                    var nightShiftEnd = 0.0;
+                                    var tNormalHours = 0.0;
+                                    var tNightHours = 0.0;
+                                    
                                     if (site.SiteStarttime == null)
                                     {
                                         notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Start time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Critical });
