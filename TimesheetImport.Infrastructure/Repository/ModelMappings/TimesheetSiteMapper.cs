@@ -120,7 +120,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                     employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString() || w.EmplName == reader.GetValue(0).ToString()).FirstOrDefault();
                                     NewProduct jobPosition = rms.NewProducts.Where(w => w.ProdName == jobName).FirstOrDefault();
                                     Site site = rms.Sites.Where(w => w.SiteSiteId == fileUploadRequest.SiteId).FirstOrDefault();
-                                    Rate rate = rms.Rates.Where(w => w.RateSiteid == fileUploadRequest.SiteId).FirstOrDefault();
+                                    Rate rate = rms.Rates.Where(w => w.RateSiteid == fileUploadRequest.SiteId && w.RateType == "Company" && w.RateStatus == "Active").OrderByDescending(r => r.RateEffectivedate).FirstOrDefault();
                                     int holidayCount = rms.HolidaySetItems.Where(w => w.HsitHsetHolidaySetId == site.SitePhset && w.HsitCreatedDate.Value.Date == startDate.Date).Count();
                                     Decimal timePhhrs = 0;
                                     Decimal timeSundayhrs = 0;
@@ -161,13 +161,13 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         break;
                                     }
 
-                                    if (site.SiteNsbceatype.ToLower() == "rates" && rate.RateNsbceashiftstart == null)
+                                    if (site.SiteNsbceatype.ToLower() == "rates" && (rate == null || rate.RateNsbceashiftstart == null))
                                     {
                                         notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift Start time in CRM is not setup correctly for rate: " + site.SiteName, Severity = Severity.Critical });
                                         break;
                                     }
 
-                                    if (site.SiteNsbceatype.ToLower() == "rates" && rate.RateNsbceashiftend == null)
+                                    if (site.SiteNsbceatype.ToLower() == "rates" && (rate == null || rate.RateNsbceashiftend == null))
                                     {
                                         notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift End time in CRM is not setup correctly for rate: " + site.SiteName, Severity = Severity.Critical });
                                         break;
