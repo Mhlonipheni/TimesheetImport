@@ -58,7 +58,7 @@
               "namedChunks": true
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -71,9 +71,9 @@
               "browserTarget": "TimesheetImportApp:build:development"
             }
           },
-          "defaultConfiguration": "development",
+          "defaultConfiguration": "production",
           "options": {
-            "proxyConfig": "src/proxy.conf.js"
+            "proxyConfig": "src/proxy.conf.prod.js"
           }
         },
         "extract-i18n": {

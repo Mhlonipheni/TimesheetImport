@@ -244,7 +244,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimeStarttime = startTime.ToString().Replace(":", "").Substring(0, 4),
                                             TimeEndtime = endTime.ToString().Replace(":", "").Substring(0, 4),
                                             TimeWorkedhrs = Convert.ToDecimal(workedHrs), // normal worked hours.
-                                            TimeSource = "Import", //CRM, Payrun
+                                            TimeSource = "NS BCEA", //CRM, Payrun
                                             TimeBatchNo = batchNo, // how to get this
                                             TimeWeek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
                                             TimeNewweek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) + 1,
