@@ -10,7 +10,7 @@ export class TimesheetImportService {
   constructor(private restService: RestService, private http: HttpClient) { }
 
   getTimeSheetSites(): Observable<TimesheetImport.ITimesheetSite[]> {
-    return this.restService.get<TimesheetImport.ITimesheetSite[]>('/api/timesheetimport/GetTimesheetSites');
+    return this.restService.get<TimesheetImport.ITimesheetSite[]>('/TimesheetImportAPI/api/timesheetimport/GetTimesheetSites');
   }
 
   upload(fileUploadRequest: TimesheetImport.FileUploadRequest): Observable<HttpEvent<TimesheetImport.ITimesheetImportResult>> {
@@ -18,7 +18,7 @@ export class TimesheetImportService {
 
     formData.append('file', fileUploadRequest.File);
     formData.append('siteId', fileUploadRequest.siteId);
-    const req = new HttpRequest('POST', '/api/timesheetimport/Import', formData, {
+    const req = new HttpRequest('POST', '/TimesheetImportAPI/api/timesheetimport/Import', formData, {
       reportProgress: true,
       responseType: 'json'
     });
@@ -27,7 +27,7 @@ export class TimesheetImportService {
   }
 
   confirm(timesheetDetails: TimesheetImport.ITimesheetDetail[]): Observable<TimesheetImport.ITimesheetImportConfirmationResult> {
-    return this.http.post<TimesheetImport.ITimesheetImportConfirmationResult>('/api/timesheetimport/ConfirmImport', timesheetDetails);
+    return this.http.post<TimesheetImport.ITimesheetImportConfirmationResult>('/TimesheetImportAPI/api/timesheetimport/ConfirmImport', timesheetDetails);
   }
 }
 
