@@ -203,7 +203,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             break;
                                         }
 
-                                        Tuple<double, double> hours = CalculateHours(sd, ed, nightShiftStart, nightShiftEnd);
+                                        var hours = CalculateHours(sd, ed, nightShiftStart, nightShiftEnd, workedHrs);
 
                                         if (sd.DayOfWeek == DayOfWeek.Sunday)
                                         {
@@ -298,18 +298,18 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             };
         }
 
-        private static Tuple<double, double> CalculateHours(DateTime start, DateTime end, double nightShiftStart, double nightShiftEnd)
+        public static (double NormalHours, double NightShiftHours) CalculateHours(DateTime start, DateTime end, double nightShiftStart, double nightShiftEnd, double timeWorked)
         {
             double normalHours = 0.0;
             double nightHours = 0.0;
             DateTime current = start;
 
             end = end.AddHours(1);
-
+            //a-d e
             while (current < end)
             {
                 if (current.Hour >= nightShiftEnd && current.Hour < nightShiftStart)
-                {                   
+                {
                     normalHours += (current.Hour == nightShiftStart) ? current.Minute / 60.0 : 1;
                 }
                 else
@@ -318,9 +318,15 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                 }
                 current = current.AddHours(1);
             }
-            normalHours += (normalHours > 0) ? -1 : 0;
-            nightHours += (normalHours <= 0) ? -1 : 0;
-            return Tuple.Create(normalHours, nightHours);
+            var totalHoursSplit = normalHours + nightHours;
+            if (totalHoursSplit > timeWorked)
+            {
+                var hoursOver = totalHoursSplit - timeWorked;
+                normalHours = (normalHours > 0) ? normalHours - hoursOver : normalHours;
+                nightHours = (normalHours <= 0) ? nightHours - hoursOver : nightHours;
+            }
+
+            return (normalHours, nightHours);
         }
     }
 }
