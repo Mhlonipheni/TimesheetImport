@@ -207,16 +207,16 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
 
                                         if (sd.DayOfWeek == DayOfWeek.Sunday)
                                         {
-                                            timeSundayhrs = Convert.ToDecimal(hours.Item1) + Convert.ToDecimal(hours.Item2);
+                                            timeSundayhrs = Convert.ToDecimal(hours.NormalHours) + Convert.ToDecimal(hours.NightShiftHours);
                                         }
                                         else if (holidayCount > 0)
                                         {
-                                            timePhhrs = Convert.ToDecimal(hours.Item1) + Convert.ToDecimal(hours.Item2);
+                                            timePhhrs = Convert.ToDecimal(hours.NormalHours) + Convert.ToDecimal(hours.NightShiftHours);
                                         }
                                         else
                                         {
-                                            tNormalHours = hours.Item1;
-                                            tNightHours = hours.Item2;
+                                            tNormalHours = hours.NormalHours;
+                                            tNightHours = hours.NightShiftHours;
                                         }
 
                                         var timesheet = new TimesheetDetail
