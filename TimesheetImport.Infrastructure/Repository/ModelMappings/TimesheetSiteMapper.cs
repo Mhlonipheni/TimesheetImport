@@ -181,7 +181,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         Match match = Regex.Match(reader.GetString(j)?.ToString(), pattern);
                                         shift = Convert.ToDouble(match.Groups[1].Value);
                                         var startTime = reader.GetDateTime(j + 1).TimeOfDay;
-                                        var endTime = reader.GetDateTime(j + 2).TimeOfDay;
+                                        var shiftEndTime = reader.GetDateTime(j + 2).TimeOfDay;
 
                                         //Calc fields
                                         nightShiftStart = (site.SiteNsbceatype == null || site.SiteNsbceatype.ToLower() == "site") ?
@@ -194,7 +194,11 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         var timeShift = IsNormalShift ? "NormalShift" : "NightShift";
 
                                         var sd = date.Add(startTime);
-                                        var ed = sd.AddHours(workedHrs);
+                                        var ed = date.Add(shiftEndTime);
+                                        if(sd > ed)
+                                        {
+                                            ed = ed.AddDays(1);
+                                        }
                                         var crmTimeSheet = rms.Timesheets.Where(w => w.TimeEmployeeid == employee.EmplEmployeeId && w.TimeStartdate == sd && w.TimeShift == timeShift && w.TimeDeleted == null).FirstOrDefault();
 
                                         if (crmTimeSheet != null)
@@ -242,7 +246,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimePosition = jobPosition?.ProdProductId,
                                             TimeShift = timeShift,
                                             TimeStarttime = startTime.ToString().Replace(":", "").Substring(0, 4),
-                                            TimeEndtime = endTime.ToString().Replace(":", "").Substring(0, 4),
+                                            TimeEndtime = shiftEndTime.ToString().Replace(":", "").Substring(0, 4),
                                             TimeWorkedhrs = Convert.ToDecimal(workedHrs), // normal worked hours.
                                             TimeSource = "NS BCEA", //CRM, Payrun
                                             TimeBatchNo = batchNo, // how to get this
@@ -303,30 +307,20 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             double normalHours = 0.0;
             double nightHours = 0.0;
             DateTime current = start;
-
-            end = end.AddHours(1);
-            //a-d e
+            var totalShiftHours = end - start;
             while (current < end)
             {
                 if (current.Hour >= nightShiftEnd && current.Hour < nightShiftStart)
                 {
-                    normalHours += (current.Hour == nightShiftStart) ? current.Minute / 60.0 : 1;
+                    normalHours += (current.Minute > 0) ? current.Minute / 60.0 : 1;
                 }
-                else
-                {
-                    nightHours += (current.Hour == nightShiftEnd) ? current.Minute / 60.0 : 1;
-                }
-                current = current.AddHours(1);
-            }
-            var totalHoursSplit = normalHours + nightHours;
-            if (totalHoursSplit > timeWorked)
-            {
-                var hoursOver = totalHoursSplit - timeWorked;
-                normalHours = (normalHours > 0) ? normalHours - hoursOver : normalHours;
-                nightHours = (normalHours <= 0) ? nightHours - hoursOver : nightHours;
+                current = (current.Minute > 0) ? current.AddMinutes(current.Minute) : current.AddHours(1);
             }
 
-            return (normalHours, nightHours);
+            normalHours = (normalHours > 0 && totalShiftHours.TotalHours > timeWorked) ? normalHours - (totalShiftHours.TotalHours - timeWorked) : normalHours;
+            nightHours = (normalHours <= 0) ? timeWorked: timeWorked - normalHours;           
+
+            return (Math.Round(normalHours,2), Math.Round(nightHours,2));
         }
     }
 }
