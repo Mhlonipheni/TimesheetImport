@@ -13,7 +13,10 @@ Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 builder.Services.Configure<InfrastructureOptions>(builder.Configuration);
 builder.Services.AddTransient<ITimesheetSiteRepository, TimesheetSiteRepository>();
 builder.Services.AddTransient<ITimesheetSiteService, TimesheetSiteService>();
-builder.Services.AddDbContext<RMSContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("RMSConnectionString")));
+builder.Services.AddDbContext<RMSContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("RMSConnectionString"), x=> x.CommandTimeout(600)));
+
+
+
 builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
