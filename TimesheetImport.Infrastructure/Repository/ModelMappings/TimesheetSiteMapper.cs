@@ -79,7 +79,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             var notifications = new List<Notification>();
             try
             {
-                var lasttimesheet = rms.Timesheets.OrderByDescending(o => o.TimeBatchNo).FirstOrDefault();
+                var lasttimesheet = rms.Timesheets.OrderByDescending(o => o.TimeBatchNo).Select(x => new { x.TimeBatchNo }).FirstOrDefault();
 
                 if (lasttimesheet == null || lasttimesheet.TimeBatchNo.HasValue == false)
                     batchNo = 1;
@@ -112,13 +112,15 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
 
                                 int j = 4;
                                 int i = 7;
-                                double shift = 0;
                                 for (DateTime date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
                                 {
                                     //Read CRM inputs
-                                    Employee employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString() || w.EmplName == reader.GetValue(0).ToString()).FirstOrDefault();
-                                    NewProduct jobPosition = rms.NewProducts.Where(w => w.ProdName == jobName).FirstOrDefault();
-                                    Site site = rms.Sites.Where(w => w.SiteSiteId == fileUploadRequest.SiteId).FirstOrDefault();
+                                    var employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString() || w.EmplName == reader.GetValue(0).ToString())
+                                        .Select(e => new {e.EmplEmployeeId, e.EmplName, e.EmplSecterr}).FirstOrDefault();
+                                    var jobPosition = rms.NewProducts.Where(w => w.ProdName == jobName)
+                                                            .Select(p => new { p.ProdProductId }).FirstOrDefault();
+                                    var site = rms.Sites.Where(w => w.SiteSiteId == fileUploadRequest.SiteId)
+                                               .Select(s => new { s.SitePhset, s.SiteStarttime, s.SiteName, s.SiteEndtime, s.SiteNsbceatype, s.SiteNsbceashiftstart, s.SiteNsbceashiftend, s.SiteCompanyId }).FirstOrDefault();
                                     if (employee == null)
                                     {
                                         notifications.Add(new Notification() { LineNumber = reader.GetValue(0).ToString(), Message = "Employee could not be found in CRM: " + reader.GetValue(0).ToString(), Severity = Severity.Critical });
@@ -127,25 +129,6 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                     if (jobPosition == null)
                                     {
                                         notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Job title could not be found in CRM: " + jobName, Severity = Severity.Critical });
-                                        break;
-                                    }
-                                    Rate rate = rms.Rates.Where(w => w.RateSiteid == fileUploadRequest.SiteId && w.RateType == "Company" && w.RateStatus == "Active" && w.RatePosition == jobPosition.ProdProductId).OrderByDescending(r => r.RateEffectivedate).FirstOrDefault();
-                                    int holidayCount = rms.HolidaySetItems.Where(w => w.HsitHsetHolidaySetId == site.SitePhset && w.HsitCreatedDate.Value.Date == startDate.Date).Count();
-                                    Decimal timePhhrs = 0;
-                                    Decimal timeSundayhrs = 0;
-                                    var nightShiftStart = 0.0;
-                                    var nightShiftEnd = 0.0;
-                                    var tNormalHours = 0.0;
-                                    var tNightHours = 0.0;
-                                    
-                                    if (site.SiteStarttime == null)
-                                    {
-                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Start time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Critical });
-                                        break;
-                                    }
-                                    if (site.SiteEndtime == null)
-                                    {
-                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "End time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Critical });
                                         break;
                                     }
 
@@ -161,6 +144,23 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         break;
                                     }
 
+                                    if (site.SiteStarttime == null)
+                                    {
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Start time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Critical });
+                                        break;
+                                    }
+                                    if (site.SiteEndtime == null)
+                                    {
+                                        notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "End time in CRM is not setup correctly  for site: " + site.SiteName, Severity = Severity.Critical });
+                                        break;
+                                    }
+                                    RateModel rate = null;
+                                    if (site.SiteNsbceatype.ToLower() == "rates")
+                                    {
+                                        rate = rms.Rates.Where(w => w.RateSiteid == fileUploadRequest.SiteId && w.RateType == "Company" && w.RateStatus == "Active" && w.RatePosition == jobPosition.ProdProductId).OrderByDescending(r => r.RateEffectivedate)
+                                           .Select(r => new RateModel { RateNsbceashiftend = r.RateNsbceashiftend, RateNsbceashiftstart = r.RateNsbceashiftstart }).FirstOrDefault();
+                                    }
+
                                     if (site.SiteNsbceatype.ToLower() == "rates" && (rate == null || rate.RateNsbceashiftstart == null))
                                     {
                                         notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift Start time in CRM is not setup correctly for rate: " + site.SiteName, Severity = Severity.Critical });
@@ -172,14 +172,22 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Night Shift End time in CRM is not setup correctly for rate: " + site.SiteName, Severity = Severity.Critical });
                                         break;
                                     }
+                                    int holidayCount = rms.HolidaySetItems.Where(w => w.HsitHsetHolidaySetId == site.SitePhset && w.HsitCreatedDate.Value.Date == startDate.Date).Count();
+                                    Decimal timePhhrs = 0;
+                                    Decimal timeSundayhrs = 0;
+                                    var nightShiftStart = 0.0;
+                                    var nightShiftEnd = 0.0;
+                                    var tNormalHours = 0.0;
+                                    var tNightHours = 0.0;
 
                                     //Read Excel inputs
                                     string pattern = @"(\d+)(\D+)";
                                     if (!string.IsNullOrEmpty(reader.GetString(j)))
                                     {
                                         var workedHrs = Convert.ToDouble(reader.GetValue(i));
-                                        Match match = Regex.Match(reader.GetString(j)?.ToString(), pattern);
-                                        shift = Convert.ToDouble(match.Groups[1].Value);
+                                        //Match match = Regex.Match(reader.GetString(j)?.ToString(), pattern);
+                                        //shift = Convert.ToDouble(match.Groups[1].Value);
+                                        TimeSpan shiftSatrtTime = DateTime.Parse(reader.GetString(j)?.ToString()).TimeOfDay;
                                         var startTime = reader.GetDateTime(j + 1).TimeOfDay;
                                         var shiftEndTime = reader.GetDateTime(j + 2).TimeOfDay;
 
@@ -190,26 +198,27 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         nightShiftEnd = (site.SiteNsbceatype == null || site.SiteNsbceatype.ToLower() == "site") ?
                                          site.SiteNsbceashiftend.Value : rate.RateNsbceashiftend.Value;
 
-                                        var IsNormalShift = shift > nightShiftEnd && shift < nightShiftStart;
+                                        var IsNormalShift = shiftSatrtTime.TotalHours >= nightShiftEnd && shiftSatrtTime.TotalHours < nightShiftStart;
                                         var timeShift = IsNormalShift ? "NormalShift" : "NightShift";
 
-                                        var sd = date.Add(startTime);
-                                        var ed = date.Add(shiftEndTime);
-                                        if(sd > ed)
+                                        var shiftStartDateTime = date.Add(shiftSatrtTime);
+                                        var shiftEndDateTime = date.Add(shiftEndTime);
+                                        if(shiftStartDateTime > shiftEndDateTime)
                                         {
-                                            ed = ed.AddDays(1);
+                                            shiftEndDateTime = shiftEndDateTime.AddDays(1);
                                         }
-                                        var crmTimeSheet = rms.Timesheets.Where(w => w.TimeEmployeeid == employee.EmplEmployeeId && w.TimeStartdate == sd && w.TimeShift == timeShift && w.TimeDeleted == null).FirstOrDefault();
+                                        var crmTimeSheet = rms.Timesheets.Where(w => w.TimeEmployeeid == employee.EmplEmployeeId && w.TimeStartdate == shiftStartDateTime && w.TimeShift == timeShift && w.TimeDeleted == null)
+                                            .Select(t => new { t.TimeTimesheetId}).FirstOrDefault();
 
                                         if (crmTimeSheet != null)
                                         {
-                                            notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Duplicate record in CRM for Employee: " + employee.EmplName + " for date: " + sd.ToShortDateString(), Severity = Severity.Critical });
+                                            notifications.Add(new Notification() { LineNumber = employee.EmplName, Message = "Duplicate record in CRM for Employee: " + employee.EmplName + " for date: " + shiftStartDateTime.ToShortDateString(), Severity = Severity.Critical });
                                             break;
                                         }
 
-                                        var hours = CalculateHours(sd, ed, nightShiftStart, nightShiftEnd, workedHrs);
+                                        var hours = CalculateHours(shiftStartDateTime, shiftEndDateTime, nightShiftStart, nightShiftEnd, workedHrs);
 
-                                        if (sd.DayOfWeek == DayOfWeek.Sunday)
+                                        if (shiftStartDateTime.DayOfWeek == DayOfWeek.Sunday)
                                         {
                                             timeSundayhrs = Convert.ToDecimal(hours.NormalHours) + Convert.ToDecimal(hours.NightShiftHours);
                                         }
@@ -234,8 +243,8 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimeStatus = "New",// NULL,Approved,Duplicate,Leave,New,NightShift,Normal,UnApproved
                                             TimeCompanyId = site.SiteCompanyId, // couple of companies in DB
                                             TimeEmployeeid = employee?.EmplEmployeeId,//Convert.(reader.GetValue(3)), //come back
-                                            TimeStartdate = sd,
-                                            TimeEnddate = ed,
+                                            TimeStartdate = shiftStartDateTime,
+                                            TimeEnddate = shiftEndDateTime,
                                             TimeNormalhrs = Convert.ToDecimal(tNormalHours),
                                             TimeOvertimehrs = null, //anything over than 8 hours is overtime??//comment out
                                             TimePhhrs = timePhhrs,//don't know this
