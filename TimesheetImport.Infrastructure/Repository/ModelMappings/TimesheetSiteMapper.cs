@@ -117,10 +117,13 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                     //Read CRM inputs
                                     var employee = rms.Employees.Where(w => w.EmplIdnumber == reader.GetValue(3).ToString() || w.EmplName == reader.GetValue(0).ToString())
                                         .Select(e => new {e.EmplEmployeeId, e.EmplName, e.EmplSecterr}).FirstOrDefault();
+
                                     var jobPosition = rms.NewProducts.Where(w => w.ProdName == jobName)
                                                             .Select(p => new { p.ProdProductId }).FirstOrDefault();
+
                                     var site = rms.Sites.Where(w => w.SiteSiteId == fileUploadRequest.SiteId)
                                                .Select(s => new { s.SitePhset, s.SiteStarttime, s.SiteName, s.SiteEndtime, s.SiteNsbceatype, s.SiteNsbceashiftstart, s.SiteNsbceashiftend, s.SiteCompanyId }).FirstOrDefault();
+
                                     if (employee == null)
                                     {
                                         notifications.Add(new Notification() { LineNumber = reader.GetValue(0).ToString(), Message = "Employee could not be found in CRM: " + reader.GetValue(0).ToString(), Severity = Severity.Critical });
@@ -185,8 +188,6 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                     if (!string.IsNullOrEmpty(reader.GetString(j)))
                                     {
                                         var workedHrs = Convert.ToDouble(reader.GetValue(i));
-                                        //Match match = Regex.Match(reader.GetString(j)?.ToString(), pattern);
-                                        //shift = Convert.ToDouble(match.Groups[1].Value);
                                         TimeSpan shiftSatrtTime = DateTime.Parse(reader.GetString(j)?.ToString()).TimeOfDay;
                                         var startTime = reader.GetDateTime(j + 1).TimeOfDay;
                                         var shiftEndTime = reader.GetDateTime(j + 2).TimeOfDay;
