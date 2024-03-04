@@ -58,22 +58,22 @@
               "namedChunks": true
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "development"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
               "browserTarget": "TimesheetImportApp:build:production",
-              "proxyConfig": "src/proxy.conf.prod.js"
+              "proxyConfig": "src/proxy.conf.js"
             },
             "development": {
               "browserTarget": "TimesheetImportApp:build:development"
             }
           },
-          "defaultConfiguration": "production",
+          "defaultConfiguration": "development",
           "options": {
-            "proxyConfig": "src/proxy.conf.prod.js"
+            "proxyConfig": "src/proxy.conf.js"
           }
         },
         "extract-i18n": {
