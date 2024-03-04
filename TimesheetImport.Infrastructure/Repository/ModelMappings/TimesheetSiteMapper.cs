@@ -204,8 +204,11 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
 
                                         var shiftStartDateTime = date.Add(shiftSatrtTime);
                                         var shiftEndDateTime = date.Add(shiftEndTime);
-                                        if(shiftStartDateTime > shiftEndDateTime)
+                                        var actualWorkStartDateTime = date.Add(startTime);
+                                        
+                                        if(shiftStartDateTime > actualWorkStartDateTime)
                                         {
+                                            actualWorkStartDateTime =  actualWorkStartDateTime.AddDays(1);
                                             shiftEndDateTime = shiftEndDateTime.AddDays(1);
                                         }
                                         var crmTimeSheet = rms.Timesheets.Where(w => w.TimeEmployeeid == employee.EmplEmployeeId && w.TimeStartdate == shiftStartDateTime && w.TimeShift == timeShift && w.TimeDeleted == null)
@@ -217,7 +220,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             break;
                                         }
 
-                                        var hours = CalculateHours(shiftStartDateTime, shiftEndDateTime, nightShiftStart, nightShiftEnd, workedHrs);
+                                        var hours = CalculateHours(shiftStartDateTime, actualWorkStartDateTime, shiftEndDateTime,nightShiftStart, nightShiftEnd, workedHrs);
 
                                         if (shiftStartDateTime.DayOfWeek == DayOfWeek.Sunday)
                                         {
@@ -311,24 +314,69 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                 Notifications = model
             };
         }
-
-        public static (double NormalHours, double NightShiftHours) CalculateHours(DateTime start, DateTime end, double nightShiftStart, double nightShiftEnd, double timeWorked)
+        
+        public static (double NormalHours, double NightShiftHours) CalculateHours(DateTime shiftStartDateTime, DateTime workStartDateTime, DateTime workEndDateTime, double nightShiftStart, double nightShiftEnd, double timeWorked)
         {
             double normalHours = 0.0;
             double nightHours = 0.0;
-            DateTime current = start;
-            var totalShiftHours = end - start;
-            while (current < end)
-            {
-                if (current.Hour >= nightShiftEnd && current.Hour < nightShiftStart)
-                {
-                    normalHours += (current.Minute > 0) ? current.Minute / 60.0 : 1;
-                }
-                current = (current.Minute > 0) ? current.AddMinutes(current.Minute) : current.AddHours(1);
-            }
+          
+            ///steps and conditions
+            ///Condition 1. Employee worked only normal hours
+            ///Condition 2. Employee worked only night hours
+            ///Condition 3. Employee worked from normal hours to night hours
+            ///Condition 4. Employee worked  from night hours to normal hours
 
-            normalHours = (normalHours > 0 && totalShiftHours.TotalHours > timeWorked) ? normalHours - (totalShiftHours.TotalHours - timeWorked) : normalHours;
-            nightHours = (normalHours <= 0) ? timeWorked: timeWorked - normalHours;           
+            ///Condition 1: implementation
+            ///If workStartDateTime is greater or equal to nightShiftEnd datetime and workEndDateTime less or equal?? nightShiftStart datetime
+
+            ///Condition 2: implementation
+            ///If workStartDateTime is greater or equal to nightShiftStart datetime and workEndDateTime less or equal?? nightShiftEnd datetime
+
+            ///Condition 3: implementation
+            ///If workStartDateTime is greater or equal to nightShiftEnd and workStartDateTime is less to nightShiftStart 
+            ///&& workEndDateTime great nightShiftStart datetime && workEndDateTime less or equal?? nightShiftEnd datetime
+
+            ///Condition 4: implementation ( else to above 3)
+           
+            var nightShifstartDateTime = workStartDateTime.Date.AddHours(nightShiftStart);
+            var nightShifEndtDateTime = workEndDateTime.Date.AddHours(nightShiftEnd);
+
+            if (workStartDateTime >= nightShifEndtDateTime)
+            {
+                nightShifEndtDateTime = nightShifEndtDateTime.AddDays(1);
+            }
+            var isSameDay = nightShifstartDateTime.Date == nightShifEndtDateTime.Date;
+            if (workStartDateTime < nightShifstartDateTime && workEndDateTime <= nightShifstartDateTime && !isSameDay)
+            {
+                normalHours = timeWorked;
+            }
+            else if(workStartDateTime >= nightShifstartDateTime && workEndDateTime <= nightShifEndtDateTime)
+            {
+                nightHours = timeWorked;
+            }
+            else if(workStartDateTime < nightShifstartDateTime && workEndDateTime > nightShifstartDateTime && workEndDateTime <= nightShifEndtDateTime)
+            {
+                nightHours = Math.Round((workEndDateTime - nightShifstartDateTime).TotalHours,2);
+                var posibleBreak = 1;
+                normalHours = timeWorked - nightHours;
+
+                if(normalHours + nightHours > timeWorked)
+                {
+                    normalHours -= posibleBreak;
+                }
+                
+            }
+            else
+            {
+                nightHours = Math.Round((nightShifEndtDateTime - workStartDateTime).TotalHours, 2);
+                var posibleBreak = 1;
+                normalHours = timeWorked - nightHours;
+
+                if (normalHours + nightHours > timeWorked)
+                {
+                    normalHours -= posibleBreak;
+                }
+            }
 
             return (Math.Round(normalHours,2), Math.Round(nightHours,2));
         }
