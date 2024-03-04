@@ -205,8 +205,10 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                         var shiftStartDateTime = date.Add(shiftSatrtTime);
                                         var shiftEndDateTime = date.Add(shiftEndTime);
                                         var actualWorkStartDateTime = date.Add(startTime);
-                                        if(shiftStartDateTime > shiftEndDateTime)
+                                        
+                                        if(shiftStartDateTime > actualWorkStartDateTime)
                                         {
+                                            actualWorkStartDateTime =  actualWorkStartDateTime.AddDays(1);
                                             shiftEndDateTime = shiftEndDateTime.AddDays(1);
                                         }
                                         var crmTimeSheet = rms.Timesheets.Where(w => w.TimeEmployeeid == employee.EmplEmployeeId && w.TimeStartdate == shiftStartDateTime && w.TimeShift == timeShift && w.TimeDeleted == null)
@@ -317,17 +319,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
         {
             double normalHours = 0.0;
             double nightHours = 0.0;
-            //DateTime current = start.AddHours(1);
-            //var totalShiftHours = end - start;
-            //while (current <= end)
-            //{
-            //    if (current.Hour >= nightShiftEnd && current.Hour < nightShiftStart)
-            //    {
-            //        normalHours += (current.Minute > 0) ? current.Minute / 60.0 : 1;
-            //    }
-            //    current = (current.Minute > 0) ? current.AddMinutes(current.Minute) : current.AddHours(1);
-            //}
-
+          
             ///steps and conditions
             ///Condition 1. Employee worked only normal hours
             ///Condition 2. Employee worked only night hours
@@ -344,13 +336,17 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             ///If workStartDateTime is greater or equal to nightShiftEnd and workStartDateTime is less to nightShiftStart 
             ///&& workEndDateTime great nightShiftStart datetime && workEndDateTime less or equal?? nightShiftEnd datetime
 
-            ///Condition 4: implementation
-            ///If workStartDateTime is greater or equal to nightShiftStart and workStartDateTime is less to nightShiftEnd 
-            ///&& workEndDateTime great nightShiftEnd datetime && workEndDateTime less or equal?? nightShiftStart datetime
-            ///
+            ///Condition 4: implementation ( else to above 3)
+           
+            var nightShifstartDateTime = workStartDateTime.Date.AddHours(nightShiftStart);
             var nightShifEndtDateTime = workEndDateTime.Date.AddHours(nightShiftEnd);
-            var nightShifstartDateTime = shiftStartDateTime.Date.AddHours(nightShiftStart);
-            if(workStartDateTime >= nightShifEndtDateTime && workEndDateTime <= nightShifstartDateTime)
+
+            if (workStartDateTime >= nightShifEndtDateTime)
+            {
+                nightShifEndtDateTime = nightShifEndtDateTime.AddDays(1);
+            }
+            var isSameDay = nightShifstartDateTime.Date == nightShifEndtDateTime.Date;
+            if (workStartDateTime < nightShifstartDateTime && workEndDateTime <= nightShifstartDateTime && !isSameDay)
             {
                 normalHours = timeWorked;
             }
@@ -358,38 +354,31 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
             {
                 nightHours = timeWorked;
             }
-            else if(workStartDateTime >= nightShifEndtDateTime && workStartDateTime < nightShifstartDateTime 
-                && workEndDateTime > nightShifstartDateTime && workEndDateTime <= nightShifEndtDateTime)
+            else if(workStartDateTime < nightShifstartDateTime && workEndDateTime > nightShifstartDateTime && workEndDateTime <= nightShifEndtDateTime)
             {
-                
+                nightHours = Math.Round((workEndDateTime - nightShifstartDateTime).TotalHours,2);
+                var posibleBreak = 1;
+                normalHours = timeWorked - nightHours;
+
+                if(normalHours + nightHours > timeWorked)
+                {
+                    normalHours -= posibleBreak;
+                }
                 
             }
-            else if (workStartDateTime >= nightShifstartDateTime && workStartDateTime < nightShifEndtDateTime
-                && workEndDateTime > nightShifEndtDateTime && workEndDateTime <= nightShifstartDateTime)
+            else
             {
+                nightHours = Math.Round((nightShifEndtDateTime - workStartDateTime).TotalHours, 2);
+                var posibleBreak = 1;
+                normalHours = timeWorked - nightHours;
 
-
+                if (normalHours + nightHours > timeWorked)
+                {
+                    normalHours -= posibleBreak;
+                }
             }
-            //else if (workStartDateTime > nightShifstartDateTime && workStartDateTime.AddHours(timeWorked) > nightShifEndtDateTime)
-            //{
-            //    var breakHours = 0;
-            //    if ((end - workStartDateTime).TotalHours > timeWorked)
-            //    {
-            //        breakHours = 1;
-            //    }
-            //    normalHours = Math.Round((end - nightShifEndtDateTime).TotalHours, 2);
-            //    if (normalHours + (timeWorked - normalHours) > timeWorked)
-            //    {
-            //        normalHours -= breakHours;
-            //    }
-            //    nightHours = Math.Round(timeWorked - normalHours, 2);
-                
-            //}
-                //if(end)
-                //normalHours = (normalHours > 0 && totalShiftHours.TotalHours > timeWorked) ? normalHours - (Math.Round(totalShiftHours.TotalHours,2) - timeWorked) : normalHours;
-                //nightHours = (normalHours <= 0) ? timeWorked: timeWorked - normalHours;           
 
-                return (Math.Round(normalHours,2), Math.Round(nightHours,2));
+            return (Math.Round(normalHours,2), Math.Round(nightHours,2));
         }
     }
 }
