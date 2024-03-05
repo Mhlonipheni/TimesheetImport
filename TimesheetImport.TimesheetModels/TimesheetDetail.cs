@@ -36,5 +36,6 @@ namespace TimesheetImport.TimesheetModels
         public int? TimeTimesheetrunid { get; set; }
         public int? TimeNewweek { get; set; }
         public decimal? TimePhhrs { get; set; }
+        public string TimeApproved { get; set; }
     }
 }
