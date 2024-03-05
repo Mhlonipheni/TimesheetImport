@@ -58,6 +58,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                     TimeWeek = timesheetDetail.TimeWeek,
                     TimeTimesheetrunid = timesheetRunId,
                     TimeNewweek = timesheetDetail.TimeNewweek,
+                    TimeApproved = timesheetDetail.TimeApproved
                 };
                 timesheets.Add(timesheet);
             }
@@ -244,7 +245,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimeUpdatedDate = DateTime.Now,
                                             TimeTimeStamp = DateTime.Now,
                                             TimeSecterr = employee?.EmplSecterr, // NULL,- 2147483640,- 1342177274
-                                            TimeStatus = "New",// NULL,Approved,Duplicate,Leave,New,NightShift,Normal,UnApproved
+                                            TimeStatus = "Approved",// NULL,Approved,Duplicate,Leave,New,NightShift,Normal,UnApproved
                                             TimeCompanyId = site.SiteCompanyId, // couple of companies in DB
                                             TimeEmployeeid = employee?.EmplEmployeeId,//Convert.(reader.GetValue(3)), //come back
                                             TimeStartdate = shiftStartDateTime,
@@ -265,6 +266,7 @@ namespace TimesheetImport.Infrastructure.Repository.ModelMappings
                                             TimeBatchNo = batchNo, // how to get this
                                             TimeWeek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
                                             TimeNewweek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) + 1,
+                                            TimeApproved = "Y"
                                         };
 
                                         if (workedHrs > 0)
